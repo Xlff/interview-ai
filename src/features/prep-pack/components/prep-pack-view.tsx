@@ -1,5 +1,6 @@
 import Link from "next/link";
 import type { SavedPrepPack } from "../models/prep-pack";
+import StartInterviewButton from "./start-interview-button";
 
 type PrepPackViewProps = {
   prepPack: SavedPrepPack;
@@ -71,22 +72,7 @@ export default function PrepPackView({ prepPack }: PrepPackViewProps) {
               gap: "12px",
             }}
           >
-            <span
-              aria-disabled="true"
-              style={{
-                display: "inline-flex",
-                alignItems: "center",
-                justifyContent: "center",
-                minHeight: "48px",
-                padding: "0 20px",
-                borderRadius: "999px",
-                background: "rgba(174, 92, 47, 0.18)",
-                color: "var(--accent)",
-                fontWeight: 700,
-              }}
-            >
-              文字面试即将开放
-            </span>
+            <StartInterviewButton jobTargetId={prepPack.jobTargetId} />
             <Link
               href="/"
               style={{
