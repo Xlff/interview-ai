@@ -13,7 +13,6 @@ export default function JobTargetForm() {
     state,
     errors,
     isSubmitting,
-    savedJobTarget,
     submitError,
     setPreferredDomain,
     setRawJD,
@@ -183,66 +182,10 @@ export default function JobTargetForm() {
               fontSize: "0.95rem",
             }}
           >
-            结果会保存在本地数据库，后续直接接准备包与模拟面试。
+            成功解析后会自动进入岗位准备包页面。
           </span>
         </div>
       </form>
-
-      {savedJobTarget ? (
-        <article
-          style={{
-            display: "grid",
-            gap: "14px",
-            marginTop: "24px",
-            borderRadius: "20px",
-            padding: "20px",
-            background: "rgba(239, 226, 207, 0.5)",
-          }}
-        >
-          <div>
-            <p
-              style={{
-                margin: 0,
-                color: "var(--muted)",
-                fontSize: "0.82rem",
-                letterSpacing: "0.18em",
-                textTransform: "uppercase",
-              }}
-            >
-              解析结果
-            </p>
-            <h3
-              style={{
-                margin: "10px 0 0",
-                fontSize: "1.4rem",
-              }}
-            >
-              {savedJobTarget.level} {savedJobTarget.normalizedTitle}
-            </h3>
-          </div>
-
-          <div
-            style={{
-              display: "grid",
-              gap: "12px",
-              gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))",
-            }}
-          >
-            <section>
-              <h4 style={{ margin: 0 }}>关键技能</h4>
-              <p style={{ margin: "8px 0 0", color: "var(--muted)", lineHeight: 1.7 }}>
-                {savedJobTarget.keySkills.join(" / ")}
-              </p>
-            </section>
-            <section>
-              <h4 style={{ margin: 0 }}>职责关键词</h4>
-              <p style={{ margin: "8px 0 0", color: "var(--muted)", lineHeight: 1.7 }}>
-                {savedJobTarget.responsibilities.join(" / ")}
-              </p>
-            </section>
-          </div>
-        </article>
-      ) : null}
     </section>
   );
 }

@@ -1,41 +1,12 @@
 "use client";
 
+import { useRouter } from "next/navigation";
 import { useState } from "react";
 import type {
   JobTargetDomain,
-  JobTargetInput,
   JobTargetValidationResult,
-  SavedJobTarget,
 } from "../models/job-target";
-
-const minimumLength = 20;
-
-export function validateJobTargetInput(input: JobTargetInput): JobTargetValidationResult {
-  const rawJD = input.rawJD.trim();
-
-  if (!rawJD) {
-    return {
-      success: false,
-      errors: {
-        rawJD: "请输入职位描述",
-      },
-    };
-  }
-
-  if (rawJD.length < minimumLength) {
-    return {
-      success: false,
-      errors: {
-        rawJD: `职位描述至少需要 ${minimumLength} 个字符`,
-      },
-    };
-  }
-
-  return {
-    success: true,
-    errors: {},
-  };
-}
+import { validateJobTargetInput } from "../models/job-target";
 
 type UseJobTargetFormState = {
   rawJD: string;
@@ -43,13 +14,13 @@ type UseJobTargetFormState = {
 };
 
 export function useJobTargetForm() {
+  const router = useRouter();
   const [state, setState] = useState<UseJobTargetFormState>({
     rawJD: "",
     preferredDomain: "technical",
   });
   const [errors, setErrors] = useState<JobTargetValidationResult["errors"]>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [savedJobTarget, setSavedJobTarget] = useState<SavedJobTarget | null>(null);
   const [submitError, setSubmitError] = useState<string | null>(null);
 
   async function submit() {
@@ -76,8 +47,8 @@ export function useJobTargetForm() {
         throw new Error("岗位解析暂时不可用，请稍后重试");
       }
 
-      const payload = (await response.json()) as SavedJobTarget;
-      setSavedJobTarget(payload);
+      const payload = (await response.json()) as { id: string };
+      router.push(`/prep/${payload.id}`);
 
       return true;
     } catch (error) {
@@ -92,7 +63,6 @@ export function useJobTargetForm() {
     state,
     errors,
     isSubmitting,
-    savedJobTarget,
     submitError,
     setRawJD(rawJD: string) {
       setState(function update(previous) {

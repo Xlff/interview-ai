@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { validateJobTargetInput } from "./use-job-target-form";
+import { validateJobTargetInput } from "../models/job-target";
 
 describe("validateJobTargetInput", function () {
   it("rejects blank jd input", function () {

@@ -1,6 +1,5 @@
 import { NextResponse } from "next/server";
-import type { JobTargetInput } from "@/features/job-target/models/job-target";
-import { validateJobTargetInput } from "@/features/job-target/view-models/use-job-target-form";
+import { validateJobTargetInput, type JobTargetInput } from "@/features/job-target/models/job-target";
 import { createJobTarget } from "@/server/repositories/job-target-repository";
 import { analyzeJobDescription } from "@/server/services/jd-analysis-service";
 

@@ -28,7 +28,7 @@ model JobTarget {
   updatedAt       DateTime           @updatedAt
   user            User?              @relation(fields: [userId], references: [id], onDelete: SetNull)
   roleProfile     RoleProfile?
-  prepPacks       PrepPack[]
+  prepPack        PrepPack?
   sessions        InterviewSession[]
 }
 
@@ -46,7 +46,7 @@ model RoleProfile {
 
 model PrepPack {
   id               String    @id @default(uuid()) @db.Uuid
-  jobTargetId      String    @db.Uuid
+  jobTargetId      String    @unique @db.Uuid
   roleSummary      String
   highFreqQuestions Json
   evaluationPoints Json
