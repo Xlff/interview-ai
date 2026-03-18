@@ -249,22 +249,47 @@ export default function InterviewChat({ initialSession }: InterviewChatProps) {
             <p style={{ margin: 0, color: "var(--muted)", lineHeight: 1.8 }}>
               复盘报告和下一轮弱项定向训练将在下一步开放。
             </p>
-            <Link
-              href={`/prep/${session.jobTargetId}`}
+            <div
               style={{
-                display: "inline-flex",
-                alignItems: "center",
-                justifyContent: "center",
-                minHeight: "48px",
-                padding: "0 20px",
-                borderRadius: "999px",
-                border: "1px solid var(--border)",
-                fontWeight: 700,
-                width: "fit-content",
+                display: "flex",
+                flexWrap: "wrap",
+                gap: "12px",
               }}
             >
-              返回岗位准备包
-            </Link>
+              <Link
+                href={`/review/${session.id}`}
+                style={{
+                  display: "inline-flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  minHeight: "48px",
+                  padding: "0 20px",
+                  borderRadius: "999px",
+                  background: "var(--accent)",
+                  color: "var(--accent-foreground)",
+                  fontWeight: 700,
+                  width: "fit-content",
+                }}
+              >
+                查看复盘报告
+              </Link>
+              <Link
+                href={`/prep/${session.jobTargetId}`}
+                style={{
+                  display: "inline-flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  minHeight: "48px",
+                  padding: "0 20px",
+                  borderRadius: "999px",
+                  border: "1px solid var(--border)",
+                  fontWeight: 700,
+                  width: "fit-content",
+                }}
+              >
+                返回岗位准备包
+              </Link>
+            </div>
           </section>
         )}
       </section>
