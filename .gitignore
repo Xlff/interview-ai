@@ -7,6 +7,8 @@ node_modules/
 out/
 coverage/
 dist/
+.cache/
+$PWD/
 
 .superpowers/
 !.superpowers/.gitkeep

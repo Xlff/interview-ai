@@ -1,0 +1,100 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id         String      @id @default(uuid()) @db.Uuid
+  email      String      @unique
+  createdAt  DateTime    @default(now())
+  updatedAt  DateTime    @updatedAt
+  jobTargets JobTarget[]
+}
+
+model JobTarget {
+  id              String             @id @default(uuid()) @db.Uuid
+  userId          String?            @db.Uuid
+  rawJD           String
+  normalizedTitle String
+  domain          String
+  level           String
+  keySkills       Json
+  responsibilities Json
+  createdAt       DateTime           @default(now())
+  updatedAt       DateTime           @updatedAt
+  user            User?              @relation(fields: [userId], references: [id], onDelete: SetNull)
+  roleProfile     RoleProfile?
+  prepPacks       PrepPack[]
+  sessions        InterviewSession[]
+}
+
+model RoleProfile {
+  id             String    @id @default(uuid()) @db.Uuid
+  jobTargetId    String    @unique @db.Uuid
+  dimensions     Json
+  mustHaveSkills Json
+  niceToHaveSkills Json
+  questionThemes Json
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+  jobTarget      JobTarget @relation(fields: [jobTargetId], references: [id], onDelete: Cascade)
+}
+
+model PrepPack {
+  id               String    @id @default(uuid()) @db.Uuid
+  jobTargetId      String    @db.Uuid
+  roleSummary      String
+  highFreqQuestions Json
+  evaluationPoints Json
+  studyOutline     Json
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
+  jobTarget        JobTarget @relation(fields: [jobTargetId], references: [id], onDelete: Cascade)
+}
+
+model InterviewSession {
+  id           String          @id @default(uuid()) @db.Uuid
+  jobTargetId  String          @db.Uuid
+  status       String
+  mode         String
+  totalRounds  Int
+  currentRound Int
+  createdAt    DateTime        @default(now())
+  completedAt  DateTime?
+  updatedAt    DateTime        @updatedAt
+  jobTarget    JobTarget       @relation(fields: [jobTargetId], references: [id], onDelete: Cascade)
+  turns        InterviewTurn[]
+  reviewReport ReviewReport?
+}
+
+model InterviewTurn {
+  id           String           @id @default(uuid()) @db.Uuid
+  sessionId    String           @db.Uuid
+  question     String
+  questionType String
+  dimension    String
+  userAnswer   String?
+  evaluation   Json?
+  followUpHint String?
+  turnIndex    Int
+  createdAt    DateTime         @default(now())
+  updatedAt    DateTime         @updatedAt
+  session      InterviewSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+}
+
+model ReviewReport {
+  id                 String           @id @default(uuid()) @db.Uuid
+  sessionId          String           @unique @db.Uuid
+  strengths          Json
+  gaps               Json
+  missedPoints       Json
+  communicationNotes Json
+  nextStudyPlan      Json
+  createdAt          DateTime         @default(now())
+  updatedAt          DateTime         @updatedAt
+  session            InterviewSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+}
