@@ -1,0 +1,109 @@
+import type { JobTargetDraft, JobTargetDomain, JobTargetInput } from "@/features/job-target/models/job-target";
+
+const technicalKeywords = ["React", "TypeScript", "Next.js", "前端", "后端", "全栈", "工程师"];
+const productKeywords = ["产品", "需求分析", "PRD", "路线图", "用户研究"];
+const operationsKeywords = ["运营", "增长", "投放", "活动策划", "内容运营"];
+
+const skillKeywords = [
+  "React",
+  "TypeScript",
+  "Next.js",
+  "JavaScript",
+  "Node.js",
+  "SQL",
+  "数据分析",
+  "A/B 测试",
+  "用户研究",
+  "项目管理",
+  "沟通协作",
+];
+
+const responsibilityKeywords = [
+  "企业级 Web 应用开发",
+  "复杂页面搭建",
+  "性能优化",
+  "组件设计",
+  "跨团队协作",
+  "需求分析",
+  "活动策划",
+  "数据分析",
+];
+
+export function analyzeJobDescription(input: JobTargetInput): JobTargetDraft {
+  const rawJD = input.rawJD.trim();
+  const domain = detectDomain(rawJD, input.preferredDomain);
+
+  return {
+    normalizedTitle: detectTitle(rawJD, domain),
+    domain,
+    level: detectLevel(rawJD),
+    keySkills: collectMatches(rawJD, skillKeywords),
+    responsibilities: collectMatches(rawJD, responsibilityKeywords),
+  };
+}
+
+function detectDomain(rawJD: string, fallback: JobTargetDomain): JobTargetDomain {
+  if (containsAny(rawJD, technicalKeywords)) {
+    return "technical";
+  }
+
+  if (containsAny(rawJD, productKeywords)) {
+    return "product";
+  }
+
+  if (containsAny(rawJD, operationsKeywords)) {
+    return "operations";
+  }
+
+  return fallback;
+}
+
+function detectTitle(rawJD: string, domain: JobTargetDomain) {
+  if (containsAny(rawJD, ["前端", "Frontend"])) {
+    return "前端开发工程师";
+  }
+
+  if (containsAny(rawJD, ["后端", "Backend"])) {
+    return "后端开发工程师";
+  }
+
+  if (containsAny(rawJD, ["全栈", "Full Stack"])) {
+    return "全栈开发工程师";
+  }
+
+  if (domain === "product") {
+    return "产品经理";
+  }
+
+  if (domain === "operations") {
+    return "运营专员";
+  }
+
+  return "技术岗位";
+}
+
+function detectLevel(rawJD: string) {
+  if (containsAny(rawJD, ["高级", "资深", "Senior"])) {
+    return "高级";
+  }
+
+  if (containsAny(rawJD, ["专家", "Lead"])) {
+    return "专家";
+  }
+
+  return "中级";
+}
+
+function collectMatches(rawJD: string, keywords: string[]) {
+  const matches = keywords.filter(function hasKeyword(keyword) {
+    return rawJD.toLowerCase().includes(keyword.toLowerCase());
+  });
+
+  return matches.length > 0 ? matches : ["待进一步解析"];
+}
+
+function containsAny(rawJD: string, keywords: string[]) {
+  return keywords.some(function hasKeyword(keyword) {
+    return rawJD.toLowerCase().includes(keyword.toLowerCase());
+  });
+}
