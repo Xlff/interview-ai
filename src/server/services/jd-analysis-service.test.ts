@@ -22,4 +22,18 @@ describe("analyzeJobDescription", function () {
       expect.arrayContaining(["企业级 Web 应用开发", "性能优化", "跨团队协作"]),
     );
   });
+
+  it("maps skill aliases back to canonical dictionary names", function () {
+    const draft = analyzeJobDescription({
+      rawJD: `
+        负责增长业务前端开发，要求熟悉 react.js、ts 和 next，
+        能够推进复杂页面开发、性能优化，并与后端保持跨团队协作。
+      `,
+      preferredDomain: "technical",
+    });
+
+    expect(draft.keySkills).toEqual(
+      expect.arrayContaining(["React", "TypeScript", "Next.js"]),
+    );
+  });
 });

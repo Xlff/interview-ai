@@ -1,22 +1,9 @@
 import type { JobTargetDraft, JobTargetDomain, JobTargetInput } from "@/features/job-target/models/job-target";
+import { skillDictionaries } from "../seeds/content-layer-data";
 
 const technicalKeywords = ["React", "TypeScript", "Next.js", "前端", "后端", "全栈", "工程师"];
 const productKeywords = ["产品", "需求分析", "PRD", "路线图", "用户研究"];
 const operationsKeywords = ["运营", "增长", "投放", "活动策划", "内容运营"];
-
-const skillKeywords = [
-  "React",
-  "TypeScript",
-  "Next.js",
-  "JavaScript",
-  "Node.js",
-  "SQL",
-  "数据分析",
-  "A/B 测试",
-  "用户研究",
-  "项目管理",
-  "沟通协作",
-];
 
 const responsibilityKeywords = [
   "企业级 Web 应用开发",
@@ -37,7 +24,7 @@ export function analyzeJobDescription(input: JobTargetInput): JobTargetDraft {
     normalizedTitle: detectTitle(rawJD, domain),
     domain,
     level: detectLevel(rawJD),
-    keySkills: collectMatches(rawJD, skillKeywords),
+    keySkills: collectSkillMatches(rawJD, domain),
     responsibilities: collectMatches(rawJD, responsibilityKeywords),
   };
 }
@@ -98,6 +85,24 @@ function collectMatches(rawJD: string, keywords: string[]) {
   const matches = keywords.filter(function hasKeyword(keyword) {
     return rawJD.toLowerCase().includes(keyword.toLowerCase());
   });
+
+  return matches.length > 0 ? matches : ["待进一步解析"];
+}
+
+function collectSkillMatches(rawJD: string, domain: JobTargetDomain) {
+  const availableSkills = skillDictionaries.filter(function matchesDomain(skill) {
+    return skill.domain === domain;
+  });
+
+  const matches = availableSkills
+    .filter(function hasAnyAlias(skill) {
+      return [skill.name, ...skill.aliases].some(function hasKeyword(keyword) {
+        return rawJD.toLowerCase().includes(keyword.toLowerCase());
+      });
+    })
+    .map(function toCanonicalName(skill) {
+      return skill.name;
+    });
 
   return matches.length > 0 ? matches : ["待进一步解析"];
 }

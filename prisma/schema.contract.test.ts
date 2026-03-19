@@ -14,6 +14,16 @@ describe("core interview schema", function () {
     expect(schema).toContain("model ReviewReport");
   });
 
+  it("defines the content layer persistence models", function () {
+    const schema = readFileSync(resolve(process.cwd(), "prisma/schema.prisma"), "utf8");
+
+    expect(schema).toContain("model SkillDictionary");
+    expect(schema).toContain("model RoleTemplate");
+    expect(schema).toContain("model RoleConfig");
+    expect(schema).toContain("model QuestionBankItem");
+    expect(schema).toContain("model MockJobDescription");
+  });
+
   it("stores one prep pack per job target", function () {
     const schema = readFileSync(resolve(process.cwd(), "prisma/schema.prisma"), "utf8");
 

@@ -1,7 +1,14 @@
 import type { JobTargetDraft } from "@/features/job-target/models/job-target";
 import type { SavedPrepPack } from "@/features/prep-pack/models/prep-pack";
 import { db } from "@/lib/db";
+import {
+  getRoleConfigByTemplateId,
+  listQuestionBankItemsByDomain,
+  listRoleTemplatesByDomain,
+} from "@/server/repositories/content-layer-repository";
+import { resolveRoleTemplate } from "@/server/services/content-layer-service";
 import { generatePrepPack } from "@/server/services/prep-pack-service";
+import { selectTopQuestions } from "@/server/services/question-selection-service";
 import { buildRoleProfile } from "@/server/services/role-profile-service";
 
 type PersistedJobTarget = JobTargetDraft & {
@@ -34,7 +41,36 @@ export async function getOrCreatePrepPack(jobTargetId: string): Promise<SavedPre
     return null;
   }
 
-  const roleProfileDraft = buildRoleProfile(jobTarget);
+  const roleTemplates = await listRoleTemplatesByDomain(jobTarget.domain);
+  const roleTemplate = resolveRoleTemplate(jobTarget, roleTemplates);
+
+  if (!roleTemplate) {
+    return null;
+  }
+
+  const roleConfig = await getRoleConfigByTemplateId(roleTemplate.id);
+
+  if (!roleConfig) {
+    return null;
+  }
+
+  const questionBankItems = await listQuestionBankItemsByDomain(jobTarget.domain);
+  const selectedQuestions = selectTopQuestions({
+    domain: jobTarget.domain,
+    normalizedTitle: roleTemplate.normalizedTitle,
+    level: roleTemplate.level,
+    matchedSkills: jobTarget.keySkills,
+    preferredDimensions: roleConfig.questionSelectionRules.preferredDimensions,
+    maxQuestions: roleConfig.questionSelectionRules.maxQuestions,
+    questionBankItems,
+  });
+
+  const roleProfileDraft = buildRoleProfile(jobTarget, roleTemplate, {
+    ...roleConfig,
+    domain: roleTemplate.domain,
+    normalizedTitle: roleTemplate.normalizedTitle,
+    level: roleTemplate.level,
+  });
 
   const roleProfileRecord = await db.roleProfile.upsert({
     where: { jobTargetId },
@@ -56,6 +92,14 @@ export async function getOrCreatePrepPack(jobTargetId: string): Promise<SavedPre
   const prepPackDraft = generatePrepPack({
     ...jobTarget,
     roleProfile: roleProfileDraft,
+    roleTemplate,
+    roleConfig: {
+      ...roleConfig,
+      domain: roleTemplate.domain,
+      normalizedTitle: roleTemplate.normalizedTitle,
+      level: roleTemplate.level,
+    },
+    selectedQuestions,
   });
 
   const prepPackRecord = await db.prepPack.upsert({

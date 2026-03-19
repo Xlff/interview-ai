@@ -97,3 +97,77 @@ model ReviewReport {
   updatedAt          DateTime         @updatedAt
   session            InterviewSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
 }
+
+model SkillDictionary {
+  id        String   @id @default(uuid()) @db.Uuid
+  name      String
+  aliases   Json
+  domain    String
+  category  String
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([domain, name])
+}
+
+model RoleTemplate {
+  id                      String      @id @default(uuid()) @db.Uuid
+  domain                  String
+  normalizedTitle         String
+  level                   String
+  dimensions              Json
+  defaultQuestionThemes   Json
+  defaultEvaluationPoints Json
+  isActive                Boolean     @default(true)
+  createdAt               DateTime    @default(now())
+  updatedAt               DateTime    @updatedAt
+  roleConfig              RoleConfig?
+
+  @@unique([domain, normalizedTitle, level])
+}
+
+model RoleConfig {
+  id                     String       @id @default(uuid()) @db.Uuid
+  roleTemplateId         String       @unique @db.Uuid
+  mustHaveSkillIds       Json
+  niceToHaveSkillIds     Json
+  questionSelectionRules Json
+  prepPackRules          Json
+  isActive               Boolean      @default(true)
+  createdAt              DateTime     @default(now())
+  updatedAt              DateTime     @updatedAt
+  roleTemplate           RoleTemplate @relation(fields: [roleTemplateId], references: [id], onDelete: Cascade)
+}
+
+model QuestionBankItem {
+  id               String   @id @default(uuid()) @db.Uuid
+  domain           String
+  normalizedTitle  String
+  level            String
+  dimension        String
+  question         String
+  questionType     String
+  skillTags        Json
+  evaluationPoints Json
+  followUpHints    Json
+  isActive         Boolean  @default(true)
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  @@index([domain, normalizedTitle, level])
+}
+
+model MockJobDescription {
+  id              String   @id @default(uuid()) @db.Uuid
+  domain          String
+  normalizedTitle String
+  level           String
+  label           String
+  rawJD           String
+  isSeed          Boolean  @default(true)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@index([domain, normalizedTitle, level])
+}
