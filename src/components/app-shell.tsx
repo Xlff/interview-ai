@@ -3,9 +3,15 @@ import UserMenu from "@/components/user-menu";
 
 type AppShellProps = Readonly<{
   children: React.ReactNode;
+  isAuthenticated?: boolean;
+  userEmail?: string | null;
 }>;
 
-export default function AppShell({ children }: AppShellProps) {
+export default function AppShell({
+  children,
+  isAuthenticated = false,
+  userEmail = null,
+}: AppShellProps) {
   return (
     <>
       <header className="sticky top-0 z-10 border-b border-[var(--border)] bg-[rgba(251,245,238,0.88)] backdrop-blur-md">
@@ -18,7 +24,7 @@ export default function AppShell({ children }: AppShellProps) {
               支持产品、运营、技术岗的 JD 驱动面试准备
             </p>
           </div>
-          <UserMenu />
+          <UserMenu isAuthenticated={isAuthenticated} userEmail={userEmail} />
         </div>
       </header>
       {children}

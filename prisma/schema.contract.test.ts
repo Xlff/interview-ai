@@ -37,4 +37,12 @@ describe("core interview schema", function () {
     expect(schema).toContain("normalizedJD");
     expect(schema).toContain("jdHash");
   });
+
+  it("stores session ownership and focused retry fields", function () {
+    const schema = readFileSync(resolve(process.cwd(), "prisma/schema.prisma"), "utf8");
+
+    expect(schema).toContain("model InterviewSession");
+    expect(schema).toContain("userId");
+    expect(schema).toContain("focusDimensions Json?");
+  });
 });

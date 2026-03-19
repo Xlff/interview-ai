@@ -63,7 +63,9 @@ export async function enhanceInterviewEvaluation(
     evaluationPoints: expectedKeywords,
   });
 
-  const verdict = llmEvaluation.verdict ?? input.evaluation.verdict;
+  const verdict = input.evaluation.verdict === "weak"
+    ? "weak"
+    : (llmEvaluation.verdict ?? input.evaluation.verdict);
   const summary = normalizeString(llmEvaluation.summary, input.evaluation.summary);
   const coveredPoints = normalizeArray(llmEvaluation.coveredPoints, input.evaluation.coveredPoints);
   const missingPoints = normalizeArray(llmEvaluation.missingPoints, input.evaluation.missingPoints);

@@ -13,6 +13,7 @@ type UseJobTargetFormState = {
   rawJD: string;
   preferredDomain: JobTargetDomain;
   selectedMockJobDescriptionId: string;
+  selectedMockLevel: "" | MockJobDescriptionRecord["level"];
 };
 
 export function useJobTargetForm(mockJobDescriptions: MockJobDescriptionRecord[]) {
@@ -21,6 +22,7 @@ export function useJobTargetForm(mockJobDescriptions: MockJobDescriptionRecord[]
     rawJD: "",
     preferredDomain: "technical",
     selectedMockJobDescriptionId: "",
+    selectedMockLevel: "",
   });
   const [errors, setErrors] = useState<JobTargetValidationResult["errors"]>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -74,7 +76,20 @@ export function useJobTargetForm(mockJobDescriptions: MockJobDescriptionRecord[]
     },
     setPreferredDomain(preferredDomain: JobTargetDomain) {
       setState(function update(previous) {
-        return { ...previous, preferredDomain };
+        return {
+          ...previous,
+          preferredDomain,
+          selectedMockJobDescriptionId: "",
+        };
+      });
+    },
+    setSelectedMockLevel(selectedMockLevel: "" | MockJobDescriptionRecord["level"]) {
+      setState(function update(previous) {
+        return {
+          ...previous,
+          selectedMockLevel,
+          selectedMockJobDescriptionId: "",
+        };
       });
     },
     selectMockJobDescription(mockJobDescriptionId: string) {
@@ -94,6 +109,7 @@ export function useJobTargetForm(mockJobDescriptions: MockJobDescriptionRecord[]
           ...previous,
           selectedMockJobDescriptionId: mockJobDescriptionId,
           preferredDomain: selectedMockJobDescription.domain,
+          selectedMockLevel: selectedMockJobDescription.level,
           rawJD: selectedMockJobDescription.rawJD,
         };
       });

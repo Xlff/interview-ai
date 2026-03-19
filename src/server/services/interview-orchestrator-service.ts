@@ -17,8 +17,11 @@ type PlanNextInterviewTurnInput = {
   userAnswer: string;
 };
 
-export function buildInterviewSessionDraft(prepPack: SavedPrepPack): InterviewSessionDraft {
-  const sequence = buildQuestionSequence(prepPack);
+export function buildInterviewSessionDraft(
+  prepPack: SavedPrepPack,
+  focusDimensions: string[] = [],
+): InterviewSessionDraft {
+  const sequence = buildQuestionSequence(prepPack, focusDimensions);
 
   return {
     jobTargetId: prepPack.jobTargetId,
@@ -26,6 +29,7 @@ export function buildInterviewSessionDraft(prepPack: SavedPrepPack): InterviewSe
     mode: "text",
     totalRounds: defaultTotalRounds,
     currentRound: 1,
+    focusDimensions: focusDimensions.length > 0 ? focusDimensions : undefined,
     currentTurn: sequence[0],
   };
 }
@@ -91,7 +95,7 @@ function buildPlannedInterviewOutcome(
   }
 
   const primaryQuestionsAnswered = countAnsweredPrimaryTurns(input.turns, input.currentTurn.questionType);
-  const sequence = buildQuestionSequence(input.prepPack);
+  const sequence = buildQuestionSequence(input.prepPack, input.session.focusDimensions ?? []);
   const nextPrimaryTurn = sequence[Math.min(primaryQuestionsAnswered, sequence.length - 1)];
 
   return {
@@ -105,7 +109,10 @@ function buildPlannedInterviewOutcome(
   };
 }
 
-function buildQuestionSequence(prepPack: SavedPrepPack): InterviewTurnDraft[] {
+function buildQuestionSequence(
+  prepPack: SavedPrepPack,
+  focusDimensions: string[] = [],
+): InterviewTurnDraft[] {
   const dimensions = prepPack.roleProfile.dimensions;
   const primaryQuestions = Array.from({ length: defaultTotalRounds }, function buildTurn(_, index) {
     const question = prepPack.highFreqQuestions[index] ?? buildFallbackQuestion(prepPack, index);
@@ -119,13 +126,39 @@ function buildQuestionSequence(prepPack: SavedPrepPack): InterviewTurnDraft[] {
     };
   });
 
-  return primaryQuestions;
+  if (focusDimensions.length === 0) {
+    return primaryQuestions;
+  }
+
+  const prioritized = [...primaryQuestions].sort(function compareTurns(left, right) {
+    return getFocusPriority(left.dimension, focusDimensions) - getFocusPriority(right.dimension, focusDimensions);
+  });
+
+  return prioritized.map(function normalizeTurn(turn, index) {
+    const shouldUseFocusedQuestion = focusDimensions.includes(turn.dimension) && !turn.question.includes(turn.dimension);
+
+    return {
+      ...turn,
+      question: shouldUseFocusedQuestion ? buildFocusedQuestion(turn.dimension) : turn.question,
+      turnIndex: index + 1,
+    };
+  });
 }
 
 function buildFallbackQuestion(prepPack: SavedPrepPack, index: number) {
   const theme = prepPack.roleProfile.questionThemes[index % prepPack.roleProfile.questionThemes.length];
 
   return `围绕${theme}，请结合你的实际经历讲一个最能体现你能力的案例。`;
+}
+
+function buildFocusedQuestion(dimension: string) {
+  return `聚焦${dimension}，请结合你的实际经历讲一个最能体现你能力的案例。`;
+}
+
+function getFocusPriority(dimension: string, focusDimensions: string[]) {
+  const index = focusDimensions.indexOf(dimension);
+
+  return index === -1 ? focusDimensions.length + 1 : index;
 }
 
 function countAnsweredPrimaryTurns(turns: SavedInterviewTurn[], currentQuestionType: SavedInterviewTurn["questionType"]) {

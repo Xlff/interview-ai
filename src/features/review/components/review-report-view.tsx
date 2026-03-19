@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { getListItemKey } from "@/lib/list-item-key";
+import FocusedRetryButton from "./focused-retry-button";
 import type { SavedReviewReport } from "../models/review-report";
 
 type ReviewReportViewProps = {
@@ -84,6 +85,7 @@ export default function ReviewReportView({ report, providerId, model }: ReviewRe
         </article>
 
         <div className="flex flex-wrap gap-3">
+          <FocusedRetryButton sessionId={report.sessionId} providerId={providerId} model={model} />
           <Link
             href={`/prep/${report.jobTargetId}${searchSuffix}`}
             className="inline-flex h-12 items-center justify-center whitespace-nowrap rounded-full bg-[var(--accent)] px-5 leading-none font-bold text-[var(--accent-foreground)]"

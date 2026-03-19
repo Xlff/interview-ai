@@ -1,7 +1,20 @@
 import type { JobTargetDraft, JobTargetDomain, JobTargetInput } from "@/features/job-target/models/job-target";
 import { skillDictionaries } from "../seeds/content-layer-data";
 
-const technicalKeywords = ["React", "TypeScript", "Next.js", "前端", "后端", "全栈", "工程师"];
+const technicalKeywords = [
+  "React",
+  "Vue",
+  "TypeScript",
+  "Next.js",
+  "Vite",
+  "Webpack",
+  "WebGL",
+  "WebGPU",
+  "前端",
+  "后端",
+  "全栈",
+  "工程师",
+];
 const productKeywords = ["产品", "需求分析", "PRD", "路线图", "用户研究"];
 const operationsKeywords = ["运营", "增长", "投放", "活动策划", "内容运营"];
 
@@ -10,6 +23,10 @@ const responsibilityKeywords = [
   "复杂页面搭建",
   "性能优化",
   "组件设计",
+  "前端工程化",
+  "模块化开发",
+  "数据大屏开发",
+  "适配不同尺寸设备",
   "跨团队协作",
   "需求分析",
   "活动策划",

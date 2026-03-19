@@ -36,4 +36,39 @@ describe("analyzeJobDescription", function () {
       expect.arrayContaining(["React", "TypeScript", "Next.js"]),
     );
   });
+
+  it("extracts richer frontend and visualization skills from a detailed jd", function () {
+    const draft = analyzeJobDescription({
+      rawJD: `
+        熟练掌握JavaScript/TypeScript/HTML/CSS，熟悉W3C标准和ES规范。
+        熟练掌握Vue3或React技术栈，了解其原理，能够编写高效易维护的前端代码。
+        熟悉前端工程化与模块化开发流程，如Vite和Webpack等。
+        有WebGIS和音视频相关工作经验优先。
+        熟悉数据大屏开发，能够适配不同尺寸设备。
+        了解Three.js、WebGL、WebGPU等3D图形可视化技术。
+        具备良好的团队合作精神和沟通能力。
+        热爱技术，持续关注Web开发领域的前沿技术。
+      `,
+      preferredDomain: "technical",
+    });
+
+    expect(draft.keySkills).toEqual(
+      expect.arrayContaining([
+        "JavaScript",
+        "TypeScript",
+        "HTML/CSS",
+        "Vue 3",
+        "React",
+        "Vite",
+        "Webpack",
+        "WebGIS",
+        "音视频",
+        "数据大屏",
+        "Three.js",
+        "WebGL",
+        "WebGPU",
+        "沟通协作",
+      ]),
+    );
+  });
 });

@@ -1,6 +1,7 @@
 import type { InterviewSessionSnapshot } from "@/features/interview/models/interview-session";
 import type { SavedInterviewTurn } from "@/features/interview/models/interview-turn";
 import { db } from "@/lib/db";
+import type { Prisma } from "@prisma/client";
 import { getOrCreatePrepPack } from "@/server/repositories/prep-pack-repository";
 import { createLLMProvider, type LLMRequestOptions } from "@/server/services/llm-provider";
 import {
@@ -8,9 +9,15 @@ import {
   planNextInterviewTurnWithLLM,
 } from "@/server/services/interview-orchestrator-service";
 
+type CreateInterviewSessionOptions = {
+  userId?: string;
+  focusDimensions?: string[];
+};
+
 export async function createInterviewSession(
   jobTargetId: string,
   llmOptions?: LLMRequestOptions,
+  options?: CreateInterviewSessionOptions,
 ): Promise<InterviewSessionSnapshot | null> {
   const prepPack = await getOrCreatePrepPack(jobTargetId, llmOptions);
 
@@ -18,15 +25,17 @@ export async function createInterviewSession(
     return null;
   }
 
-  const draft = buildInterviewSessionDraft(prepPack);
+  const draft = buildInterviewSessionDraft(prepPack, options?.focusDimensions ?? []);
 
   const record = await db.interviewSession.create({
     data: {
       jobTargetId,
+      userId: options?.userId ?? null,
       status: draft.status,
       mode: draft.mode,
       totalRounds: draft.totalRounds,
       currentRound: draft.currentRound,
+      focusDimensions: draft.focusDimensions as Prisma.InputJsonValue | undefined,
       turns: {
         create: {
           question: draft.currentTurn.question,
@@ -159,6 +168,7 @@ function mapSessionSnapshot(record: {
   mode: string;
   totalRounds: number;
   currentRound: number;
+  focusDimensions: unknown;
   jobTarget: {
     normalizedTitle: string;
   };
@@ -187,6 +197,9 @@ function mapSessionSnapshot(record: {
     mode: record.mode as InterviewSessionSnapshot["mode"],
     totalRounds: record.totalRounds,
     currentRound: record.currentRound,
+    focusDimensions: Array.isArray(record.focusDimensions)
+      ? (record.focusDimensions as string[])
+      : undefined,
     turns,
     currentTurn,
   };
@@ -214,4 +227,54 @@ function mapTurnRecord(record: {
     followUpHint: record.followUpHint ?? null,
     turnIndex: record.turnIndex,
   };
+}
+
+export async function createFocusedRetryInterviewSession(
+  sourceSessionId: string,
+  llmOptions?: LLMRequestOptions,
+  userId?: string,
+) {
+  const existing = await db.interviewSession.findUnique({
+    where: { id: sourceSessionId },
+    include: {
+      turns: {
+        orderBy: { turnIndex: "asc" },
+      },
+    },
+  });
+
+  if (!existing) {
+    return null;
+  }
+
+  const focusDimensions = extractWeakFocusDimensions(existing.turns);
+
+  return createInterviewSession(existing.jobTargetId, llmOptions, {
+    userId: userId ?? existing.userId ?? undefined,
+    focusDimensions,
+  });
+}
+
+function extractWeakFocusDimensions(
+  turns: Array<{
+    dimension: string;
+    evaluation: unknown;
+  }>,
+) {
+  const uniqueDimensions = new Set<string>();
+
+  turns.forEach(function collectFocusDimension(turn) {
+    const verdict =
+      typeof turn.evaluation === "object" &&
+      turn.evaluation !== null &&
+      "verdict" in turn.evaluation
+        ? turn.evaluation.verdict
+        : null;
+
+    if (verdict === "weak") {
+      uniqueDimensions.add(turn.dimension);
+    }
+  });
+
+  return uniqueDimensions.size > 0 ? Array.from(uniqueDimensions) : undefined;
 }

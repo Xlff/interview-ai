@@ -40,6 +40,11 @@ export default function InterviewChat({ initialSession, providerId, model }: Int
           <h1 className="text-[clamp(2rem,4vw,3.4rem)] leading-none font-semibold">
             {session.normalizedTitle} 文字面试
           </h1>
+          {session.focusDimensions?.length ? (
+            <p className="font-bold text-[var(--accent)]">
+              聚焦短板强化：{session.focusDimensions.join(" / ")}
+            </p>
+          ) : null}
           <p className="leading-[1.8] text-[var(--muted)]">
             第 {Math.min(session.currentRound, session.totalRounds)} / {session.totalRounds} 轮
           </p>
@@ -115,7 +120,7 @@ export default function InterviewChat({ initialSession, providerId, model }: Int
           <section className="grid gap-3 rounded-[28px] border border-[var(--border)] bg-[rgba(255,253,248,0.9)] p-6">
             <h2 className="text-xl font-semibold">本轮文字面试已完成</h2>
             <p className="leading-[1.8] text-[var(--muted)]">
-              复盘报告和下一轮弱项定向训练将在下一步开放。
+              现在你可以直接查看复盘，或继续回到准备包发起下一轮训练。
             </p>
             <div className="flex flex-wrap gap-3">
               <Link

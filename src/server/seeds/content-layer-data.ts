@@ -50,11 +50,21 @@ function makeQuestion(
 
 export const skillDictionaries: SkillDictionarySeed[] = [
   { name: "React", aliases: ["react", "react.js"], domain: "technical", category: "framework", isActive: true },
+  { name: "Vue 3", aliases: ["vue3", "vue 3", "vue.js", "vue"], domain: "technical", category: "framework", isActive: true },
   { name: "TypeScript", aliases: ["typescript", "ts"], domain: "technical", category: "language", isActive: true },
   { name: "Next.js", aliases: ["next", "nextjs", "next.js"], domain: "technical", category: "framework", isActive: true },
   { name: "JavaScript", aliases: ["javascript", "js", "es6"], domain: "technical", category: "language", isActive: true },
+  { name: "HTML/CSS", aliases: ["html/css", "html", "css", "w3c"], domain: "technical", category: "language", isActive: true },
+  { name: "Vite", aliases: ["vite"], domain: "technical", category: "tooling", isActive: true },
+  { name: "Webpack", aliases: ["webpack"], domain: "technical", category: "tooling", isActive: true },
   { name: "Node.js", aliases: ["node", "nodejs", "node.js"], domain: "technical", category: "runtime", isActive: true },
   { name: "SQL", aliases: ["sql", "mysql", "postgresql"], domain: "technical", category: "database", isActive: true },
+  { name: "WebGIS", aliases: ["webgis", "gis"], domain: "technical", category: "domain", isActive: true },
+  { name: "音视频", aliases: ["音视频", "视频", "audio", "video"], domain: "technical", category: "domain", isActive: true },
+  { name: "数据大屏", aliases: ["数据大屏", "大屏开发", "大屏"], domain: "technical", category: "visualization", isActive: true },
+  { name: "Three.js", aliases: ["three.js", "threejs", "three"], domain: "technical", category: "visualization", isActive: true },
+  { name: "WebGL", aliases: ["webgl"], domain: "technical", category: "visualization", isActive: true },
+  { name: "WebGPU", aliases: ["webgpu"], domain: "technical", category: "visualization", isActive: true },
   { name: "需求分析", aliases: ["需求分析", "需求拆解"], domain: "product", category: "capability", isActive: true },
   { name: "PRD", aliases: ["prd", "产品文档"], domain: "product", category: "artifact", isActive: true },
   { name: "用户研究", aliases: ["用户研究", "用户访谈"], domain: "product", category: "capability", isActive: true },
@@ -63,7 +73,7 @@ export const skillDictionaries: SkillDictionarySeed[] = [
   { name: "增长实验", aliases: ["增长实验", "增长测试"], domain: "operations", category: "capability", isActive: true },
   { name: "A/B 测试", aliases: ["a/b 测试", "ab 测试", "a/b test"], domain: "operations", category: "capability", isActive: true },
   { name: "活动策划", aliases: ["活动策划", "活动运营"], domain: "operations", category: "capability", isActive: true },
-  { name: "沟通协作", aliases: ["沟通协作", "跨团队协作"], domain: "technical", category: "soft-skill", isActive: true },
+  { name: "沟通协作", aliases: ["沟通协作", "跨团队协作", "团队合作", "沟通能力"], domain: "technical", category: "soft-skill", isActive: true },
 ];
 
 export const roleTemplates: RoleTemplateSeed[] = [

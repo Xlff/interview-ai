@@ -9,6 +9,7 @@ export type InterviewSessionDraft = {
   mode: InterviewSessionMode;
   totalRounds: number;
   currentRound: number;
+  focusDimensions?: string[];
   currentTurn: InterviewTurnDraft;
 };
 
@@ -19,6 +20,7 @@ export type InterviewSessionRecord = {
   mode: InterviewSessionMode;
   totalRounds: number;
   currentRound: number;
+  focusDimensions?: string[];
 };
 
 export type InterviewSessionSnapshot = InterviewSessionRecord & {

@@ -12,6 +12,7 @@ model User {
   createdAt  DateTime    @default(now())
   updatedAt  DateTime    @updatedAt
   jobTargets JobTarget[]
+  sessions   InterviewSession[]
 }
 
 model JobTarget {
@@ -58,18 +59,21 @@ model PrepPack {
 }
 
 model InterviewSession {
-  id           String          @id @default(uuid()) @db.Uuid
-  jobTargetId  String          @db.Uuid
-  status       String
-  mode         String
-  totalRounds  Int
-  currentRound Int
-  createdAt    DateTime        @default(now())
-  completedAt  DateTime?
-  updatedAt    DateTime        @updatedAt
-  jobTarget    JobTarget       @relation(fields: [jobTargetId], references: [id], onDelete: Cascade)
-  turns        InterviewTurn[]
-  reviewReport ReviewReport?
+  id              String          @id @default(uuid()) @db.Uuid
+  jobTargetId     String          @db.Uuid
+  userId          String?         @db.Uuid
+  status          String
+  mode            String
+  totalRounds     Int
+  currentRound    Int
+  focusDimensions Json?
+  createdAt       DateTime        @default(now())
+  completedAt     DateTime?
+  updatedAt       DateTime        @updatedAt
+  jobTarget       JobTarget       @relation(fields: [jobTargetId], references: [id], onDelete: Cascade)
+  user            User?           @relation(fields: [userId], references: [id], onDelete: SetNull)
+  turns           InterviewTurn[]
+  reviewReport    ReviewReport?
 }
 
 model InterviewTurn {

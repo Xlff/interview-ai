@@ -40,6 +40,23 @@ export default function PrepPackView({ prepPack, providerId, model }: PrepPackVi
 
         <section className="grid gap-[18px] [grid-template-columns:repeat(auto-fit,minmax(260px,1fr))]">
           <article className="rounded-3xl border border-[var(--border)] bg-[rgba(255,253,248,0.88)] p-6">
+            <h2 className="text-xl font-semibold">JD 识别结果</h2>
+            <dl className="mt-3 grid gap-3 text-sm leading-[1.7] text-[var(--muted)]">
+              <div>
+                <dt className="font-bold text-[var(--foreground)]">识别岗位</dt>
+                <dd>{prepPack.normalizedTitle}</dd>
+              </div>
+              <div>
+                <dt className="font-bold text-[var(--foreground)]">识别方向</dt>
+                <dd>{prepPack.domain}</dd>
+              </div>
+              <div>
+                <dt className="font-bold text-[var(--foreground)]">识别级别</dt>
+                <dd>{prepPack.level}</dd>
+              </div>
+            </dl>
+          </article>
+          <article className="rounded-3xl border border-[var(--border)] bg-[rgba(255,253,248,0.88)] p-6">
             <h2 className="text-xl font-semibold">考察维度</h2>
             <ul className="mt-3 list-disc space-y-1 pl-5 leading-[1.8]">
               {prepPack.roleProfile.dimensions.map(function renderItem(item, index) {
@@ -48,9 +65,17 @@ export default function PrepPackView({ prepPack, providerId, model }: PrepPackVi
             </ul>
           </article>
           <article className="rounded-3xl border border-[var(--border)] bg-[rgba(255,253,248,0.88)] p-6">
-            <h2 className="text-xl font-semibold">关键技能</h2>
+            <h2 className="text-xl font-semibold">识别技能</h2>
             <ul className="mt-3 list-disc space-y-1 pl-5 leading-[1.8]">
               {prepPack.keySkills.map(function renderItem(item, index) {
+                return <li key={getListItemKey(item, index)}>{item}</li>;
+              })}
+            </ul>
+          </article>
+          <article className="rounded-3xl border border-[var(--border)] bg-[rgba(255,253,248,0.88)] p-6">
+            <h2 className="text-xl font-semibold">识别职责</h2>
+            <ul className="mt-3 list-disc space-y-1 pl-5 leading-[1.8]">
+              {prepPack.responsibilities.map(function renderItem(item, index) {
                 return <li key={getListItemKey(item, index)}>{item}</li>;
               })}
             </ul>

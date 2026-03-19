@@ -40,6 +40,40 @@ describe("buildInterviewSessionDraft", function () {
     expect(session.currentTurn.dimension).toBe("基础能力");
     expect(session.currentTurn.question).toContain("复杂前端项目");
   });
+
+  it("prioritizes focus dimensions when building a retry session", function () {
+    const session = buildInterviewSessionDraft(
+      {
+        id: "prep-pack-1",
+        jobTargetId: "job-target-1",
+        normalizedTitle: "前端开发工程师",
+        domain: "technical",
+        level: "高级",
+        keySkills: ["React", "TypeScript", "Next.js"],
+        responsibilities: ["企业级 Web 应用开发", "性能优化", "跨团队协作"],
+        roleProfile: {
+          dimensions: ["基础能力", "项目实战", "工程质量", "协作沟通"],
+          mustHaveSkills: ["React", "TypeScript", "Next.js"],
+          niceToHaveSkills: ["性能优化", "组件设计"],
+          questionThemes: ["组件设计", "性能优化", "复杂项目拆解"],
+        },
+        roleSummary:
+          "高级前端开发工程师需要同时证明技术栈深度、复杂项目经验、性能优化能力与跨团队协作能力。",
+        highFreqQuestions: [
+          "请介绍一个你主导过的复杂前端项目，你负责了哪些关键模块？",
+          "你是如何做性能优化的，具体指标提升了多少？",
+          "在 React 组件设计上，你如何平衡复用性和可维护性？",
+          "当团队代码质量出现波动时，你会怎么推动规范和工程治理？",
+        ],
+        evaluationPoints: ["技术栈深度", "项目复杂度", "性能优化思路"],
+        studyOutline: ["React 组件设计", "Next.js 渲染策略", "性能优化专项复习"],
+      },
+      ["工程质量"],
+    );
+
+    expect(session.currentTurn.dimension).toBe("工程质量");
+    expect(session.currentTurn.question).toContain("工程质量");
+  });
 });
 
 describe("planNextInterviewTurn", function () {
@@ -250,5 +284,83 @@ describe("planNextInterviewTurn", function () {
     expect(outcome.evaluation.verdict).toBe("weak");
     expect(outcome.nextTurn?.questionType).toBe("follow_up");
     expect(outcome.nextTurn?.question).toBe("请继续补充你的目标、动作拆解和量化结果。");
+  });
+
+  it("keeps the deterministic weak verdict when the answer is obviously too short", async function () {
+    const provider: LLMProvider = {
+      enhancePrepPack: async (input) => input,
+      rewriteSelectedQuestions: async (input) => input.highFreqQuestions,
+      generateFollowUpQuestion: async () => "请继续补充更具体的背景和结果。",
+      evaluateInterviewAnswer: async () => ({
+        summary: "虽然比较简短，但我认为方向还可以。",
+        coveredPoints: ["项目背景"],
+        missingPoints: [],
+        verdict: "strong",
+      }),
+      generateReviewReport: async () => ({
+        strengths: [],
+        gaps: [],
+        communicationNotes: [],
+        nextStudyPlan: [],
+      }),
+    };
+
+    const outcome = await planNextInterviewTurnWithLLM({
+      prepPack: {
+        id: "prep-pack-1",
+        jobTargetId: "job-target-1",
+        normalizedTitle: "前端开发工程师",
+        domain: "technical",
+        level: "高级",
+        keySkills: ["React", "TypeScript", "Next.js"],
+        responsibilities: ["企业级 Web 应用开发", "性能优化", "跨团队协作"],
+        roleProfile: {
+          dimensions: ["基础能力", "项目实战", "工程质量", "协作沟通"],
+          mustHaveSkills: ["React", "TypeScript", "Next.js"],
+          niceToHaveSkills: ["性能优化", "组件设计"],
+          questionThemes: ["组件设计", "性能优化", "复杂项目拆解"],
+        },
+        roleSummary:
+          "高级前端开发工程师需要同时证明技术栈深度、复杂项目经验、性能优化能力与跨团队协作能力。",
+        highFreqQuestions: [
+          "请介绍一个你主导过的复杂前端项目，你负责了哪些关键模块？",
+          "你是如何做性能优化的，具体指标提升了多少？",
+          "在 React 组件设计上，你如何平衡复用性和可维护性？",
+        ],
+        evaluationPoints: ["技术栈深度", "项目复杂度", "性能优化思路"],
+        studyOutline: ["React 组件设计", "Next.js 渲染策略", "性能优化专项复习"],
+      },
+      session: {
+        id: "session-1",
+        jobTargetId: "job-target-1",
+        status: "active",
+        mode: "text",
+        totalRounds: 6,
+        currentRound: 1,
+      },
+      turns: [
+        {
+          id: "turn-1",
+          sessionId: "session-1",
+          question: "请介绍一个你主导过的复杂前端项目，你负责了哪些关键模块？",
+          questionType: "primary",
+          dimension: "基础能力",
+          turnIndex: 1,
+        },
+      ],
+      currentTurn: {
+        id: "turn-1",
+        sessionId: "session-1",
+        question: "请介绍一个你主导过的复杂前端项目，你负责了哪些关键模块？",
+        questionType: "primary",
+        dimension: "基础能力",
+        turnIndex: 1,
+      },
+      userAnswer: "我做过一些项目。",
+      llmProvider: provider,
+    });
+
+    expect(outcome.evaluation.verdict).toBe("weak");
+    expect(outcome.nextTurn?.questionType).toBe("follow_up");
   });
 });
