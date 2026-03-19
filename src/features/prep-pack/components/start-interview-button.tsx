@@ -39,41 +39,17 @@ export default function StartInterviewButton({ jobTargetId }: StartInterviewButt
   }
 
   return (
-    <div
-      style={{
-        display: "grid",
-        gap: "8px",
-      }}
-    >
+    <div className="grid gap-2">
       <button
         disabled={isSubmitting}
         onClick={startInterview}
         type="button"
-        style={{
-          display: "inline-flex",
-          alignItems: "center",
-          justifyContent: "center",
-          minHeight: "48px",
-          padding: "0 20px",
-          borderRadius: "999px",
-          border: "none",
-          background: "var(--accent)",
-          color: "var(--accent-foreground)",
-          fontWeight: 700,
-          cursor: isSubmitting ? "progress" : "pointer",
-          opacity: isSubmitting ? 0.7 : 1,
-        }}
+        className="inline-flex h-12 items-center justify-center whitespace-nowrap rounded-full border-0 bg-[var(--accent)] px-5 leading-none font-bold text-[var(--accent-foreground)] cursor-pointer disabled:cursor-progress disabled:opacity-70"
       >
         {isSubmitting ? "创建面试中..." : "开始 10 分钟文字面试"}
       </button>
       {submitError ? (
-        <p
-          style={{
-            margin: 0,
-            color: "#b83b20",
-            fontWeight: 600,
-          }}
-        >
+        <p className="font-semibold text-[#b83b20]">
           {submitError}
         </p>
       ) : null}

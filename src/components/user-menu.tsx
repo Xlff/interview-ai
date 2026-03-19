@@ -9,16 +9,7 @@ export default function UserMenu({ isAuthenticated = false }: UserMenuProps) {
     return (
       <Link
         href="/history"
-        style={{
-          display: "inline-flex",
-          alignItems: "center",
-          justifyContent: "center",
-          minHeight: "42px",
-          padding: "0 16px",
-          borderRadius: "999px",
-          border: "1px solid var(--border)",
-          fontWeight: 600,
-        }}
+        className="inline-flex min-h-[42px] items-center justify-center rounded-full border border-[var(--border)] px-4 font-semibold"
       >
         我的记录
       </Link>
@@ -28,16 +19,7 @@ export default function UserMenu({ isAuthenticated = false }: UserMenuProps) {
   return (
     <Link
       href="/login"
-      style={{
-        display: "inline-flex",
-        alignItems: "center",
-        justifyContent: "center",
-        minHeight: "42px",
-        padding: "0 16px",
-        borderRadius: "999px",
-        border: "1px solid var(--border)",
-        fontWeight: 600,
-      }}
+      className="inline-flex min-h-[42px] items-center justify-center rounded-full border border-[var(--border)] px-4 font-semibold"
     >
       登录
     </Link>

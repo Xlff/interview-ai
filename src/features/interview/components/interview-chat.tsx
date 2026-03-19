@@ -18,142 +18,44 @@ export default function InterviewChat({ initialSession }: InterviewChatProps) {
   }
 
   return (
-    <main
-      style={{
-        display: "grid",
-        minHeight: "100vh",
-        padding: "48px 24px",
-      }}
-    >
-      <section
-        style={{
-          margin: "0 auto",
-          width: "min(1040px, 100%)",
-          display: "grid",
-          gap: "20px",
-        }}
-      >
-        <header
-          style={{
-            display: "grid",
-            gap: "12px",
-            border: "1px solid var(--border)",
-            borderRadius: "28px",
-            padding: "32px",
-            background: "rgba(255, 253, 248, 0.9)",
-            boxShadow: "0 24px 70px rgba(24, 19, 17, 0.08)",
-          }}
-        >
-          <p
-            style={{
-              margin: 0,
-              color: "var(--accent)",
-              fontSize: "0.8rem",
-              letterSpacing: "0.2em",
-              textTransform: "uppercase",
-            }}
-          >
+    <main className="grid min-h-screen px-6 py-12">
+      <section className="mx-auto grid w-full max-w-[1040px] gap-5">
+        <header className="grid gap-3 rounded-[28px] border border-[var(--border)] bg-[rgba(255,253,248,0.9)] p-8 shadow-[0_24px_70px_rgba(24,19,17,0.08)]">
+          <p className="text-[0.8rem] uppercase tracking-[0.2em] text-[var(--accent)]">
             Interview Session
           </p>
-          <h1
-            style={{
-              margin: 0,
-              fontSize: "clamp(2rem, 4vw, 3.4rem)",
-              lineHeight: 1,
-            }}
-          >
+          <h1 className="text-[clamp(2rem,4vw,3.4rem)] leading-none font-semibold">
             {session.normalizedTitle} 文字面试
           </h1>
-          <p
-            style={{
-              margin: 0,
-              color: "var(--muted)",
-              lineHeight: 1.8,
-            }}
-          >
+          <p className="leading-[1.8] text-[var(--muted)]">
             第 {Math.min(session.currentRound, session.totalRounds)} / {session.totalRounds} 轮
           </p>
           {session.currentTurn ? (
-            <p
-              style={{
-                margin: 0,
-                color: "var(--accent)",
-                fontWeight: 700,
-              }}
-            >
+            <p className="font-bold text-[var(--accent)]">
               当前考察维度：{session.currentTurn.dimension}
             </p>
           ) : null}
         </header>
 
-        <section
-          style={{
-            display: "grid",
-            gap: "16px",
-          }}
-        >
+        <section className="grid gap-4">
           {session.turns.map(function renderTurn(turn) {
             return (
-              <article
-                key={turn.id}
-                style={{
-                  display: "grid",
-                  gap: "12px",
-                }}
-              >
-                <div
-                  style={{
-                    border: "1px solid var(--border)",
-                    borderRadius: "24px",
-                    padding: "20px 24px",
-                    background: "rgba(239, 226, 207, 0.42)",
-                  }}
-                >
-                  <p
-                    style={{
-                      margin: 0,
-                      color: "var(--muted)",
-                      fontSize: "0.82rem",
-                      letterSpacing: "0.14em",
-                      textTransform: "uppercase",
-                    }}
-                  >
+              <article key={turn.id} className="grid gap-3">
+                <div className="rounded-3xl border border-[var(--border)] bg-[rgba(239,226,207,0.42)] px-6 py-5">
+                  <p className="text-[0.82rem] uppercase tracking-[0.14em] text-[var(--muted)]">
                     面试官
                   </p>
-                  <p style={{ margin: "8px 0 0", lineHeight: 1.8 }}>{turn.question}</p>
+                  <p className="mt-2 leading-[1.8]">{turn.question}</p>
                 </div>
 
                 {turn.userAnswer ? (
-                  <div
-                    style={{
-                      justifySelf: "end",
-                      width: "min(760px, 100%)",
-                      border: "1px solid var(--border)",
-                      borderRadius: "24px",
-                      padding: "20px 24px",
-                      background: "rgba(255, 253, 248, 0.92)",
-                    }}
-                  >
-                    <p
-                      style={{
-                        margin: 0,
-                        color: "var(--muted)",
-                        fontSize: "0.82rem",
-                        letterSpacing: "0.14em",
-                        textTransform: "uppercase",
-                      }}
-                    >
+                  <div className="justify-self-end w-full max-w-[760px] rounded-3xl border border-[var(--border)] bg-[rgba(255,253,248,0.92)] px-6 py-5">
+                    <p className="text-[0.82rem] uppercase tracking-[0.14em] text-[var(--muted)]">
                       你的回答
                     </p>
-                    <p style={{ margin: "8px 0 0", lineHeight: 1.8 }}>{turn.userAnswer}</p>
+                    <p className="mt-2 leading-[1.8]">{turn.userAnswer}</p>
                     {turn.evaluation ? (
-                      <p
-                        style={{
-                          margin: "12px 0 0",
-                          color: "var(--accent)",
-                          fontWeight: 700,
-                        }}
-                      >
+                      <p className="mt-3 font-bold text-[var(--accent)]">
                         面试官观察：{turn.evaluation.summary}
                       </p>
                     ) : null}
@@ -167,22 +69,10 @@ export default function InterviewChat({ initialSession }: InterviewChatProps) {
         {session.currentTurn ? (
           <form
             onSubmit={handleSubmit}
-            style={{
-              display: "grid",
-              gap: "14px",
-              border: "1px solid var(--border)",
-              borderRadius: "28px",
-              padding: "24px",
-              background: "rgba(255, 253, 248, 0.9)",
-            }}
+            className="grid gap-[14px] rounded-[28px] border border-[var(--border)] bg-[rgba(255,253,248,0.9)] p-6"
           >
-            <label
-              style={{
-                display: "grid",
-                gap: "8px",
-              }}
-            >
-              <span style={{ fontWeight: 700 }}>你的回答</span>
+            <label className="grid gap-2">
+              <span className="font-bold">你的回答</span>
               <textarea
                 aria-label="你的回答"
                 value={answer}
@@ -190,27 +80,12 @@ export default function InterviewChat({ initialSession }: InterviewChatProps) {
                   setAnswer(event.target.value);
                 }}
                 placeholder="用 STAR 或问题-行动-结果的结构来回答，会更容易拿到高分。"
-                style={{
-                  minHeight: "180px",
-                  resize: "vertical",
-                  borderRadius: "18px",
-                  border: "1px solid var(--border)",
-                  padding: "16px",
-                  background: "#fff",
-                  fontSize: "1rem",
-                  lineHeight: 1.7,
-                }}
+                className="min-h-[180px] resize-y rounded-[18px] border border-[var(--border)] bg-white p-4 text-base leading-[1.7]"
               />
             </label>
 
             {submitError ? (
-              <p
-                style={{
-                  margin: 0,
-                  color: "#b83b20",
-                  fontWeight: 600,
-                }}
-              >
+              <p className="font-semibold text-[#b83b20]">
                 {submitError}
               </p>
             ) : null}
@@ -218,74 +93,27 @@ export default function InterviewChat({ initialSession }: InterviewChatProps) {
             <button
               disabled={isSubmitting}
               type="submit"
-              style={{
-                justifySelf: "start",
-                minHeight: "48px",
-                padding: "0 20px",
-                borderRadius: "999px",
-                border: "none",
-                background: "var(--accent)",
-                color: "var(--accent-foreground)",
-                fontWeight: 700,
-                cursor: isSubmitting ? "progress" : "pointer",
-                opacity: isSubmitting ? 0.7 : 1,
-              }}
+              className="inline-flex h-12 justify-self-start items-center justify-center whitespace-nowrap rounded-full border-0 bg-[var(--accent)] px-5 leading-none font-bold text-[var(--accent-foreground)] cursor-pointer disabled:cursor-progress disabled:opacity-70"
             >
               {isSubmitting ? "提交中..." : "提交回答，进入下一题"}
             </button>
           </form>
         ) : (
-          <section
-            style={{
-              display: "grid",
-              gap: "12px",
-              border: "1px solid var(--border)",
-              borderRadius: "28px",
-              padding: "24px",
-              background: "rgba(255, 253, 248, 0.9)",
-            }}
-          >
-            <h2 style={{ margin: 0 }}>本轮文字面试已完成</h2>
-            <p style={{ margin: 0, color: "var(--muted)", lineHeight: 1.8 }}>
+          <section className="grid gap-3 rounded-[28px] border border-[var(--border)] bg-[rgba(255,253,248,0.9)] p-6">
+            <h2 className="text-xl font-semibold">本轮文字面试已完成</h2>
+            <p className="leading-[1.8] text-[var(--muted)]">
               复盘报告和下一轮弱项定向训练将在下一步开放。
             </p>
-            <div
-              style={{
-                display: "flex",
-                flexWrap: "wrap",
-                gap: "12px",
-              }}
-            >
+            <div className="flex flex-wrap gap-3">
               <Link
                 href={`/review/${session.id}`}
-                style={{
-                  display: "inline-flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  minHeight: "48px",
-                  padding: "0 20px",
-                  borderRadius: "999px",
-                  background: "var(--accent)",
-                  color: "var(--accent-foreground)",
-                  fontWeight: 700,
-                  width: "fit-content",
-                }}
+                className="inline-flex h-12 w-fit items-center justify-center whitespace-nowrap rounded-full bg-[var(--accent)] px-5 leading-none font-bold text-[var(--accent-foreground)]"
               >
                 查看复盘报告
               </Link>
               <Link
                 href={`/prep/${session.jobTargetId}`}
-                style={{
-                  display: "inline-flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  minHeight: "48px",
-                  padding: "0 20px",
-                  borderRadius: "999px",
-                  border: "1px solid var(--border)",
-                  fontWeight: 700,
-                  width: "fit-content",
-                }}
+                className="inline-flex h-12 w-fit items-center justify-center whitespace-nowrap rounded-full border border-[var(--border)] px-5 leading-none font-bold"
               >
                 返回岗位准备包
               </Link>

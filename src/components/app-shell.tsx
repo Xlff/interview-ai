@@ -8,45 +8,13 @@ type AppShellProps = Readonly<{
 export default function AppShell({ children }: AppShellProps) {
   return (
     <>
-      <header
-        style={{
-          position: "sticky",
-          top: 0,
-          zIndex: 10,
-          backdropFilter: "blur(16px)",
-          background: "rgba(251, 245, 238, 0.88)",
-          borderBottom: "1px solid var(--border)",
-        }}
-      >
-        <div
-          style={{
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "space-between",
-            gap: "16px",
-            width: "min(1120px, calc(100% - 32px))",
-            margin: "0 auto",
-            padding: "16px 0",
-          }}
-        >
+      <header className="sticky top-0 z-10 border-b border-[var(--border)] bg-[rgba(251,245,238,0.88)] backdrop-blur-md">
+        <div className="mx-auto flex w-[min(1120px,calc(100%-32px))] items-center justify-between gap-4 py-4">
           <div>
-            <Link
-              href="/"
-              style={{
-                fontSize: "1.1rem",
-                fontWeight: 700,
-                letterSpacing: "0.04em",
-              }}
-            >
+            <Link href="/" className="text-[1.1rem] font-bold tracking-[0.04em]">
               Interview AI
             </Link>
-            <p
-              style={{
-                margin: "6px 0 0",
-                color: "var(--muted)",
-                fontSize: "0.92rem",
-              }}
-            >
+            <p className="mt-1.5 text-[0.92rem] text-[var(--muted)]">
               支持产品、运营、技术岗的 JD 驱动面试准备
             </p>
           </div>

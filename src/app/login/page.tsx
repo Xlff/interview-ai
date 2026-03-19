@@ -1,82 +1,26 @@
 export default function LoginPage() {
   return (
-    <main
-      style={{
-        display: "grid",
-        minHeight: "calc(100vh - 88px)",
-        padding: "40px 24px",
-      }}
-    >
-      <section
-        style={{
-          margin: "auto",
-          width: "min(560px, 100%)",
-          border: "1px solid var(--border)",
-          borderRadius: "24px",
-          padding: "32px",
-          background: "rgba(255, 253, 248, 0.92)",
-          boxShadow: "0 24px 60px rgba(24, 19, 17, 0.08)",
-        }}
-      >
-        <p
-          style={{
-            margin: 0,
-            color: "var(--accent)",
-            fontSize: "0.8rem",
-            letterSpacing: "0.2em",
-            textTransform: "uppercase",
-          }}
-        >
+    <main className="grid min-h-[calc(100vh-88px)] px-6 py-10">
+      <section className="m-auto w-full max-w-[560px] rounded-3xl border border-[var(--border)] bg-[rgba(255,253,248,0.92)] p-8 shadow-[0_24px_60px_rgba(24,19,17,0.08)]">
+        <p className="text-[0.8rem] uppercase tracking-[0.2em] text-[var(--accent)]">
           Auth
         </p>
-        <h1
-          style={{
-            margin: "16px 0 12px",
-            fontSize: "2.2rem",
-          }}
-        >
+        <h1 className="my-4 text-[2.2rem] font-semibold">
           登录后保存你的练习记录
         </h1>
-        <p
-          style={{
-            margin: 0,
-            color: "var(--muted)",
-            lineHeight: 1.7,
-          }}
-        >
+        <p className="leading-[1.7] text-[var(--muted)]">
           第一版会使用 Supabase 邮箱 Magic Link。当前页面先作为占位入口，下一任务会接上真实的登录流程。
         </p>
-        <div
-          style={{
-            display: "grid",
-            gap: "12px",
-            marginTop: "24px",
-          }}
-        >
+        <div className="mt-6 grid gap-3">
           <input
             aria-label="邮箱地址"
             disabled
             placeholder="name@example.com"
-            style={{
-              minHeight: "48px",
-              borderRadius: "14px",
-              border: "1px solid var(--border)",
-              padding: "0 16px",
-              background: "#fff",
-              color: "var(--muted)",
-            }}
+            className="min-h-12 rounded-[14px] border border-[var(--border)] bg-white px-4 text-[var(--muted)]"
           />
           <button
             disabled
-            style={{
-              minHeight: "48px",
-              border: "none",
-              borderRadius: "14px",
-              background: "var(--accent)",
-              color: "var(--accent-foreground)",
-              fontWeight: 700,
-              opacity: 0.65,
-            }}
+            className="min-h-12 rounded-[14px] border-0 bg-[var(--accent)] font-bold text-[var(--accent-foreground)] opacity-65"
             type="button"
           >
             发送 Magic Link

@@ -27,68 +27,27 @@ export default function JobTargetForm() {
   return (
     <section
       id="jd-input"
-      style={{
-        marginTop: "32px",
-        border: "1px solid var(--border)",
-        borderRadius: "24px",
-        padding: "24px",
-        background: "var(--surface)",
-      }}
+      className="mt-8 rounded-3xl border border-[var(--border)] bg-[var(--surface)] p-6"
     >
-      <div
-        style={{
-          display: "grid",
-          gap: "10px",
-        }}
-      >
-        <h2
-          style={{
-            margin: 0,
-            fontSize: "1.45rem",
-          }}
-        >
+      <div className="grid gap-2.5">
+        <h2 className="text-[1.45rem] font-semibold">
           粘贴 JD，生成岗位目标画像
         </h2>
-        <p
-          style={{
-            margin: 0,
-            color: "var(--muted)",
-            lineHeight: 1.7,
-          }}
-        >
+        <p className="leading-[1.7] text-[var(--muted)]">
           第一版支持产品、运营、技术岗。提交后会先做岗位归类、职级判断和关键词提取。
         </p>
       </div>
 
-      <form
-        onSubmit={handleSubmit}
-        style={{
-          display: "grid",
-          gap: "16px",
-          marginTop: "20px",
-        }}
-      >
-        <label
-          style={{
-            display: "grid",
-            gap: "8px",
-          }}
-        >
-          <span style={{ fontWeight: 700 }}>岗位方向</span>
+      <form onSubmit={handleSubmit} className="mt-5 grid gap-4">
+        <label className="grid gap-2">
+          <span className="font-bold">岗位方向</span>
           <select
             aria-label="岗位方向"
             value={state.preferredDomain}
             onChange={function handleChange(event) {
               setPreferredDomain(event.target.value as (typeof domains)[number]["value"]);
             }}
-            style={{
-              minHeight: "48px",
-              borderRadius: "14px",
-              border: "1px solid var(--border)",
-              padding: "0 14px",
-              background: "#fff",
-              fontSize: "1rem",
-            }}
+            className="min-h-12 rounded-[14px] border border-[var(--border)] bg-white px-[14px] text-base"
           >
             {domains.map(function renderDomain(option) {
               return (
@@ -100,13 +59,8 @@ export default function JobTargetForm() {
           </select>
         </label>
 
-        <label
-          style={{
-            display: "grid",
-            gap: "8px",
-          }}
-        >
-          <span style={{ fontWeight: 700 }}>职位描述</span>
+        <label className="grid gap-2">
+          <span className="font-bold">职位描述</span>
           <textarea
             aria-label="职位描述"
             value={state.rawJD}
@@ -114,74 +68,31 @@ export default function JobTargetForm() {
               setRawJD(event.target.value);
             }}
             placeholder="粘贴完整 JD，包括职责、技能要求、经验要求等"
-            style={{
-              minHeight: "220px",
-              resize: "vertical",
-              borderRadius: "18px",
-              border: "1px solid var(--border)",
-              padding: "16px",
-              background: "#fff",
-              fontSize: "1rem",
-              lineHeight: 1.7,
-            }}
+            className="min-h-[220px] resize-y rounded-[18px] border border-[var(--border)] bg-white p-4 text-base leading-[1.7]"
           />
         </label>
 
         {errors.rawJD ? (
-          <p
-            style={{
-              margin: 0,
-              color: "#b83b20",
-              fontWeight: 600,
-            }}
-          >
+          <p className="font-semibold text-[#b83b20]">
             {errors.rawJD}
           </p>
         ) : null}
 
         {submitError ? (
-          <p
-            style={{
-              margin: 0,
-              color: "#b83b20",
-              fontWeight: 600,
-            }}
-          >
+          <p className="font-semibold text-[#b83b20]">
             {submitError}
           </p>
         ) : null}
 
-        <div
-          style={{
-            display: "flex",
-            flexWrap: "wrap",
-            gap: "12px",
-            alignItems: "center",
-          }}
-        >
+        <div className="flex flex-wrap items-center gap-3">
           <button
             disabled={isSubmitting}
             type="submit"
-            style={{
-              minHeight: "48px",
-              padding: "0 20px",
-              borderRadius: "999px",
-              border: "none",
-              background: "var(--accent)",
-              color: "var(--accent-foreground)",
-              fontWeight: 700,
-              cursor: isSubmitting ? "progress" : "pointer",
-              opacity: isSubmitting ? 0.7 : 1,
-            }}
+            className="inline-flex h-12 items-center justify-center whitespace-nowrap rounded-full border-0 bg-[var(--accent)] px-5 leading-none font-bold text-[var(--accent-foreground)] cursor-pointer disabled:cursor-progress disabled:opacity-70"
           >
             {isSubmitting ? "解析中..." : "生成岗位目标"}
           </button>
-          <span
-            style={{
-              color: "var(--muted)",
-              fontSize: "0.95rem",
-            }}
-          >
+          <span className="text-[0.95rem] text-[var(--muted)]">
             成功解析后会自动进入岗位准备包页面。
           </span>
         </div>
