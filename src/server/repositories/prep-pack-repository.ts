@@ -47,6 +47,37 @@ export async function getOrCreatePrepPack(
     return null;
   }
 
+  const [existingRoleProfile, existingPrepPack] = await Promise.all([
+    db.roleProfile.findUnique({
+      where: { jobTargetId },
+    }),
+    db.prepPack.findUnique({
+      where: { jobTargetId },
+    }),
+  ]);
+
+  if (existingRoleProfile && existingPrepPack) {
+    return {
+      id: existingPrepPack.id,
+      jobTargetId,
+      normalizedTitle: jobTarget.normalizedTitle,
+      domain: jobTarget.domain,
+      level: jobTarget.level,
+      keySkills: jobTarget.keySkills,
+      responsibilities: jobTarget.responsibilities,
+      roleProfile: {
+        dimensions: existingRoleProfile.dimensions as string[],
+        mustHaveSkills: existingRoleProfile.mustHaveSkills as string[],
+        niceToHaveSkills: existingRoleProfile.niceToHaveSkills as string[],
+        questionThemes: existingRoleProfile.questionThemes as string[],
+      },
+      roleSummary: existingPrepPack.roleSummary,
+      highFreqQuestions: existingPrepPack.highFreqQuestions as string[],
+      evaluationPoints: existingPrepPack.evaluationPoints as string[],
+      studyOutline: existingPrepPack.studyOutline as string[],
+    };
+  }
+
   const roleTemplates = await listRoleTemplatesByDomain(jobTarget.domain);
   const roleTemplate = resolveRoleTemplate(jobTarget, roleTemplates);
 

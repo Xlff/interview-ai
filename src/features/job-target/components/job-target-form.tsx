@@ -1,5 +1,6 @@
 "use client";
 
+import type { MockJobDescriptionRecord } from "@/features/content/models/content-layer";
 import { useJobTargetForm } from "../view-models/use-job-target-form";
 
 const domains = [
@@ -8,16 +9,46 @@ const domains = [
   { value: "operations", label: "运营岗位" },
 ] as const;
 
-export default function JobTargetForm() {
+type JobTargetFormProps = {
+  mockJobDescriptions: MockJobDescriptionRecord[];
+};
+
+function getMockGroupLabel(domain: MockJobDescriptionRecord["domain"], level: MockJobDescriptionRecord["level"]) {
+  const domainLabelMap = {
+    technical: "技术岗位",
+    product: "产品岗位",
+    operations: "运营岗位",
+  } as const;
+
+  return `${domainLabelMap[domain]} / ${level}`;
+}
+
+export default function JobTargetForm({ mockJobDescriptions }: JobTargetFormProps) {
   const {
     state,
     errors,
     isSubmitting,
     submitError,
+    selectMockJobDescription,
     setPreferredDomain,
     setRawJD,
     submit,
-  } = useJobTargetForm();
+  } = useJobTargetForm(mockJobDescriptions);
+
+  const mockOptions = Object.entries(
+    mockJobDescriptions.reduce<Record<string, MockJobDescriptionRecord[]>>(function groupOptions(
+      groups,
+      item,
+    ) {
+      const groupKey = `${item.domain}:${item.level}`;
+      const existingGroup = groups[groupKey] ?? [];
+
+      return {
+        ...groups,
+        [groupKey]: [...existingGroup, item],
+      };
+    }, {}),
+  );
 
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -39,6 +70,40 @@ export default function JobTargetForm() {
       </div>
 
       <form onSubmit={handleSubmit} className="mt-5 grid gap-4">
+        <label className="grid gap-2">
+          <span className="font-bold">示例 JD 模板</span>
+          <select
+            aria-label="示例 JD 模板"
+            value={state.selectedMockJobDescriptionId}
+            onChange={function handleChange(event) {
+              selectMockJobDescription(event.target.value);
+            }}
+            className="min-h-12 rounded-[14px] border border-[var(--border)] bg-white px-[14px] text-base"
+          >
+            <option value="">
+              选择一条 mock JD 模板，自动填入后可继续修改
+            </option>
+            {mockOptions.map(function renderGroup([groupKey, items]) {
+              const [domain, level] = groupKey.split(":") as [
+                MockJobDescriptionRecord["domain"],
+                MockJobDescriptionRecord["level"],
+              ];
+
+              return (
+                <optgroup key={groupKey} label={getMockGroupLabel(domain, level)}>
+                  {items.map(function renderItem(item) {
+                    return (
+                      <option key={item.id} value={item.id}>
+                        {item.label}
+                      </option>
+                    );
+                  })}
+                </optgroup>
+              );
+            })}
+          </select>
+        </label>
+
         <label className="grid gap-2">
           <span className="font-bold">岗位方向</span>
           <select

@@ -29,3 +29,17 @@ test("anonymous user can submit a jd and land on the prep pack page", async func
   await expect(page.getByRole("heading", { name: "高频问题" })).toBeVisible();
   await expect(page.getByRole("heading", { name: "复习提纲" })).toBeVisible();
 });
+
+test("anonymous user can choose a mock jd template and edit it", async function ({ page }) {
+  await page.goto("/");
+
+  await page.getByRole("combobox", { name: "示例 JD 模板" }).selectOption({ index: 1 });
+
+  await expect(page.getByRole("textbox", { name: "职位描述" })).not.toHaveValue("");
+  await page.getByRole("textbox", { name: "职位描述" }).fill(
+    "这是用户在 mock JD 基础上手动调整后的职位描述，补充了更多真实业务背景。",
+  );
+  await expect(page.getByRole("textbox", { name: "职位描述" })).toHaveValue(
+    "这是用户在 mock JD 基础上手动调整后的职位描述，补充了更多真实业务背景。",
+  );
+});

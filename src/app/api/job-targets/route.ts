@@ -17,7 +17,11 @@ export async function POST(request: Request) {
   }
 
   const draft = analyzeJobDescription(payload);
-  const savedJobTarget = await createJobTarget(payload.rawJD.trim(), draft);
+  const savedJobTarget = await createJobTarget(
+    payload.rawJD.trim(),
+    draft,
+    payload.preferredDomain,
+  );
 
   return NextResponse.json(savedJobTarget, { status: 201 });
 }

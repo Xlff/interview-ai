@@ -2,6 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import type { MockJobDescriptionRecord } from "@/features/content/models/content-layer";
 import type {
   JobTargetDomain,
   JobTargetValidationResult,
@@ -11,13 +12,15 @@ import { validateJobTargetInput } from "../models/job-target";
 type UseJobTargetFormState = {
   rawJD: string;
   preferredDomain: JobTargetDomain;
+  selectedMockJobDescriptionId: string;
 };
 
-export function useJobTargetForm() {
+export function useJobTargetForm(mockJobDescriptions: MockJobDescriptionRecord[]) {
   const router = useRouter();
   const [state, setState] = useState<UseJobTargetFormState>({
     rawJD: "",
     preferredDomain: "technical",
+    selectedMockJobDescriptionId: "",
   });
   const [errors, setErrors] = useState<JobTargetValidationResult["errors"]>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -65,13 +68,34 @@ export function useJobTargetForm() {
     isSubmitting,
     submitError,
     setRawJD(rawJD: string) {
-      setState(function update(previous) {
+    setState(function update(previous) {
         return { ...previous, rawJD };
       });
     },
     setPreferredDomain(preferredDomain: JobTargetDomain) {
       setState(function update(previous) {
         return { ...previous, preferredDomain };
+      });
+    },
+    selectMockJobDescription(mockJobDescriptionId: string) {
+      const selectedMockJobDescription = mockJobDescriptions.find(function findMockDescription(item) {
+        return item.id === mockJobDescriptionId;
+      });
+
+      setState(function update(previous) {
+        if (!selectedMockJobDescription) {
+          return {
+            ...previous,
+            selectedMockJobDescriptionId: "",
+          };
+        }
+
+        return {
+          ...previous,
+          selectedMockJobDescriptionId: mockJobDescriptionId,
+          preferredDomain: selectedMockJobDescription.domain,
+          rawJD: selectedMockJobDescription.rawJD,
+        };
       });
     },
     submit,

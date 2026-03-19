@@ -30,4 +30,11 @@ describe("core interview schema", function () {
     expect(schema).toContain("prepPack        PrepPack?");
     expect(schema).toContain("jobTargetId      String    @unique @db.Uuid");
   });
+
+  it("stores normalized jd cache fields on job targets", function () {
+    const schema = readFileSync(resolve(process.cwd(), "prisma/schema.prisma"), "utf8");
+
+    expect(schema).toContain("normalizedJD");
+    expect(schema).toContain("jdHash");
+  });
 });

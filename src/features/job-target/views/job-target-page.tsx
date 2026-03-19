@@ -1,8 +1,11 @@
+import { listMockJobDescriptions } from "@/server/repositories/content-layer-repository";
 import JobTargetForm from "../components/job-target-form";
 
 const supportedTracks = ["产品经理", "运营增长", "技术岗位"];
 
-export default function JobTargetPage() {
+export default async function JobTargetPage() {
+  const mockJobDescriptions = await listMockJobDescriptions();
+
   return (
     <main className="grid min-h-screen px-6 py-12">
       <section className="m-auto w-full max-w-[960px] rounded-[28px] border border-[var(--border)] bg-[rgba(255,253,248,0.88)] p-10 shadow-[0_28px_80px_rgba(24,19,17,0.08)] backdrop-blur-[18px]">
@@ -52,7 +55,7 @@ export default function JobTargetPage() {
           })}
         </div>
 
-        <JobTargetForm />
+        <JobTargetForm mockJobDescriptions={mockJobDescriptions} />
       </section>
     </main>
   );

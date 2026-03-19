@@ -18,6 +18,8 @@ model JobTarget {
   id              String             @id @default(uuid()) @db.Uuid
   userId          String?            @db.Uuid
   rawJD           String
+  normalizedJD    String?
+  jdHash          String?            @unique
   normalizedTitle String
   domain          String
   level           String
