@@ -7,12 +7,14 @@ import {
   listRoleTemplatesByDomain,
 } from "@/server/repositories/content-layer-repository";
 import { resolveRoleTemplate } from "@/server/services/content-layer-service";
-import { generatePrepPack } from "@/server/services/prep-pack-service";
+import { createLLMProvider, type LLMRequestOptions } from "@/server/services/llm-provider";
+import { enhancePrepPackDraft, generatePrepPack } from "@/server/services/prep-pack-service";
 import { selectTopQuestions } from "@/server/services/question-selection-service";
 import { buildRoleProfile } from "@/server/services/role-profile-service";
 
 type PersistedJobTarget = JobTargetDraft & {
   id: string;
+  rawJD: string;
 };
 
 export async function getJobTargetById(jobTargetId: string): Promise<PersistedJobTarget | null> {
@@ -26,6 +28,7 @@ export async function getJobTargetById(jobTargetId: string): Promise<PersistedJo
 
   return {
     id: record.id,
+    rawJD: record.rawJD,
     normalizedTitle: record.normalizedTitle,
     domain: record.domain as JobTargetDraft["domain"],
     level: record.level,
@@ -34,7 +37,10 @@ export async function getJobTargetById(jobTargetId: string): Promise<PersistedJo
   };
 }
 
-export async function getOrCreatePrepPack(jobTargetId: string): Promise<SavedPrepPack | null> {
+export async function getOrCreatePrepPack(
+  jobTargetId: string,
+  llmOptions?: LLMRequestOptions,
+): Promise<SavedPrepPack | null> {
   const jobTarget = await getJobTargetById(jobTargetId);
 
   if (!jobTarget) {
@@ -102,20 +108,27 @@ export async function getOrCreatePrepPack(jobTargetId: string): Promise<SavedPre
     selectedQuestions,
   });
 
+  const llmProvider = createLLMProvider(llmOptions);
+  const finalPrepPackDraft = await enhancePrepPackDraft({
+    rawJD: jobTarget.rawJD,
+    prepPack: prepPackDraft,
+    llmProvider,
+  });
+
   const prepPackRecord = await db.prepPack.upsert({
     where: { jobTargetId },
     update: {
-      roleSummary: prepPackDraft.roleSummary,
-      highFreqQuestions: prepPackDraft.highFreqQuestions,
-      evaluationPoints: prepPackDraft.evaluationPoints,
-      studyOutline: prepPackDraft.studyOutline,
+      roleSummary: finalPrepPackDraft.roleSummary,
+      highFreqQuestions: finalPrepPackDraft.highFreqQuestions,
+      evaluationPoints: finalPrepPackDraft.evaluationPoints,
+      studyOutline: finalPrepPackDraft.studyOutline,
     },
     create: {
       jobTargetId,
-      roleSummary: prepPackDraft.roleSummary,
-      highFreqQuestions: prepPackDraft.highFreqQuestions,
-      evaluationPoints: prepPackDraft.evaluationPoints,
-      studyOutline: prepPackDraft.studyOutline,
+      roleSummary: finalPrepPackDraft.roleSummary,
+      highFreqQuestions: finalPrepPackDraft.highFreqQuestions,
+      evaluationPoints: finalPrepPackDraft.evaluationPoints,
+      studyOutline: finalPrepPackDraft.studyOutline,
     },
   });
 

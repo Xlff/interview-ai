@@ -6,11 +6,19 @@ type PrepPackRouteProps = {
   params: Promise<{
     jobTargetId: string;
   }>;
+  searchParams: Promise<{
+    provider?: string;
+    model?: string;
+  }>;
 };
 
-export default async function PrepPackRoute({ params }: PrepPackRouteProps) {
+export default async function PrepPackRoute({ params, searchParams }: PrepPackRouteProps) {
   const { jobTargetId } = await params;
-  const prepPack = await getOrCreatePrepPack(jobTargetId);
+  const { provider, model } = await searchParams;
+  const prepPack = await getOrCreatePrepPack(jobTargetId, {
+    providerId: provider,
+    model,
+  });
 
   if (!prepPack) {
     notFound();

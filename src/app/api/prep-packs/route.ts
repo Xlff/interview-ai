@@ -3,6 +3,8 @@ import { getOrCreatePrepPack } from "@/server/repositories/prep-pack-repository"
 
 type PrepPackRequest = {
   jobTargetId?: string;
+  providerId?: string;
+  model?: string;
 };
 
 export async function POST(request: Request) {
@@ -17,7 +19,10 @@ export async function POST(request: Request) {
     );
   }
 
-  const prepPack = await getOrCreatePrepPack(payload.jobTargetId);
+  const prepPack = await getOrCreatePrepPack(payload.jobTargetId, {
+    providerId: payload.providerId,
+    model: payload.model,
+  });
 
   if (!prepPack) {
     return NextResponse.json(

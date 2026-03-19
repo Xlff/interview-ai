@@ -5,6 +5,7 @@ import type {
 } from "@/features/content/models/content-layer";
 import type { JobTargetDraft } from "@/features/job-target/models/job-target";
 import type { PrepPackDraft, RoleProfileDraft } from "@/features/prep-pack/models/prep-pack";
+import type { LLMProvider } from "./llm-provider";
 
 type GeneratePrepPackInput = JobTargetDraft & {
   roleProfile: RoleProfileDraft;
@@ -30,6 +31,30 @@ export function generatePrepPack(input: GeneratePrepPackInput): PrepPackDraft {
       ...input.roleProfile.niceToHaveSkills,
       ...input.roleTemplate.defaultQuestionThemes,
     ]).slice(0, input.roleConfig.prepPackRules.maxStudyOutlineItems),
+  };
+}
+
+type EnhancePrepPackDraftInput = {
+  rawJD: string;
+  prepPack: PrepPackDraft;
+  llmProvider: LLMProvider;
+};
+
+export async function enhancePrepPackDraft(
+  input: EnhancePrepPackDraftInput,
+): Promise<PrepPackDraft> {
+  const enhanced = await input.llmProvider.enhancePrepPack({
+    rawJD: input.rawJD,
+    roleSummary: input.prepPack.roleSummary,
+    highFreqQuestions: input.prepPack.highFreqQuestions,
+    studyOutline: input.prepPack.studyOutline,
+  });
+
+  return {
+    roleSummary: enhanced.roleSummary,
+    highFreqQuestions: enhanced.highFreqQuestions,
+    evaluationPoints: input.prepPack.evaluationPoints,
+    studyOutline: enhanced.studyOutline,
   };
 }
 
