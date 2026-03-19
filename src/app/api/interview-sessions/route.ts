@@ -3,6 +3,8 @@ import { createInterviewSession } from "@/server/repositories/interview-session-
 
 type InterviewSessionRequest = {
   jobTargetId?: string;
+  providerId?: string;
+  model?: string;
 };
 
 export async function POST(request: Request) {
@@ -15,7 +17,10 @@ export async function POST(request: Request) {
     );
   }
 
-  const session = await createInterviewSession(payload.jobTargetId);
+  const session = await createInterviewSession(payload.jobTargetId, {
+    providerId: payload.providerId,
+    model: payload.model,
+  });
 
   if (!session) {
     return NextResponse.json(

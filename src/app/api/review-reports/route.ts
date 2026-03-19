@@ -3,6 +3,8 @@ import { getOrCreateReviewReport } from "@/server/repositories/review-report-rep
 
 type ReviewReportRequest = {
   sessionId?: string;
+  providerId?: string;
+  model?: string;
 };
 
 export async function POST(request: Request) {
@@ -15,7 +17,10 @@ export async function POST(request: Request) {
     );
   }
 
-  const report = await getOrCreateReviewReport(payload.sessionId);
+  const report = await getOrCreateReviewReport(payload.sessionId, {
+    providerId: payload.providerId,
+    model: payload.model,
+  });
 
   if (!report) {
     return NextResponse.json(

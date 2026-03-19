@@ -24,5 +24,5 @@ export default async function PrepPackRoute({ params, searchParams }: PrepPackRo
     notFound();
   }
 
-  return <PrepPackPage prepPack={prepPack} />;
+  return <PrepPackPage prepPack={prepPack} providerId={provider} model={model} />;
 }

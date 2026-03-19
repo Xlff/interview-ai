@@ -5,9 +5,11 @@ import StartInterviewButton from "./start-interview-button";
 
 type PrepPackViewProps = {
   prepPack: SavedPrepPack;
+  providerId?: string;
+  model?: string;
 };
 
-export default function PrepPackView({ prepPack }: PrepPackViewProps) {
+export default function PrepPackView({ prepPack, providerId, model }: PrepPackViewProps) {
   return (
     <main className="grid min-h-screen px-6 py-12">
       <section className="mx-auto grid w-full max-w-[1040px] gap-5">
@@ -22,7 +24,11 @@ export default function PrepPackView({ prepPack }: PrepPackViewProps) {
             {prepPack.roleSummary}
           </p>
           <div className="flex flex-wrap gap-3">
-            <StartInterviewButton jobTargetId={prepPack.jobTargetId} />
+            <StartInterviewButton
+              jobTargetId={prepPack.jobTargetId}
+              providerId={providerId}
+              model={model}
+            />
             <Link
               href="/"
               className="inline-flex h-12 items-center justify-center whitespace-nowrap rounded-full border border-[var(--border)] px-5 leading-none font-bold"

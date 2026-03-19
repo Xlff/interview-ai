@@ -124,4 +124,112 @@ describe("llm provider registry", function () {
       process.env = originalEnv;
     }
   });
+
+  it("uses the live provider for follow-up, answer evaluation, and review generation", async function () {
+    vi.stubGlobal(
+      "fetch",
+      vi.fn()
+        .mockResolvedValueOnce({
+          ok: true,
+          json: async () => ({
+            choices: [
+              {
+                message: {
+                  content: "请继续补充你负责的指标、动作和最终结果。",
+                },
+              },
+            ],
+          }),
+        })
+        .mockResolvedValueOnce({
+          ok: true,
+          json: async () => ({
+            choices: [
+              {
+                message: {
+                  content: JSON.stringify({
+                    summary: "回答有案例，但量化结果还不够明确。",
+                    coveredPoints: ["项目", "动作"],
+                    missingPoints: ["量化指标"],
+                    verdict: "mixed",
+                  }),
+                },
+              },
+            ],
+          }),
+        })
+        .mockResolvedValueOnce({
+          ok: true,
+          json: async () => ({
+            choices: [
+              {
+                message: {
+                  content: JSON.stringify({
+                    strengths: ["案例背景交代清楚"],
+                    gaps: ["量化结果表达偏弱"],
+                    communicationNotes: ["建议先讲目标，再讲动作和结果"],
+                    nextStudyPlan: ["补两段可量化的项目案例"],
+                  }),
+                },
+              },
+            ],
+          }),
+        }),
+    );
+
+    const originalEnv = process.env;
+
+    process.env = {
+      ...originalEnv,
+      LLM_PROVIDER_IDS: "deepseek",
+      LLM_DEFAULT_PROVIDER: "deepseek",
+      LLM_DEEPSEEK_BASE_URL: "https://deepseek.example/v1",
+      LLM_DEEPSEEK_API_KEY: "deepseek-key",
+      LLM_DEEPSEEK_DEFAULT_MODEL: "deepseek-chat",
+      LLM_DEEPSEEK_MODELS: "deepseek-chat,deepseek-reasoner",
+    };
+
+    try {
+      const provider = createLLMProvider();
+
+      const followUp = await provider.generateFollowUpQuestion({
+        currentQuestion: "请介绍一个你主导的项目",
+        userAnswer: "我做过一个后台系统。",
+        dimension: "项目实战",
+        evaluationPoints: ["项目复杂度", "量化结果"],
+      });
+      const evaluation = await provider.evaluateInterviewAnswer({
+        question: "请介绍一个你主导的项目",
+        userAnswer: "我主导过一个后台系统改造，拆解了模块并推动上线。",
+        evaluationPoints: ["项目复杂度", "量化结果"],
+      });
+      const report = await provider.generateReviewReport({
+        normalizedTitle: "前端开发工程师",
+        turns: [
+          {
+            question: "请介绍一个你主导的项目",
+            answer: "我主导过一个后台系统改造，拆解了模块并推动上线。",
+            dimension: "项目实战",
+          },
+        ],
+      });
+
+      expect(followUp).toBe("请继续补充你负责的指标、动作和最终结果。");
+      expect(evaluation).toEqual({
+        summary: "回答有案例，但量化结果还不够明确。",
+        coveredPoints: ["项目", "动作"],
+        missingPoints: ["量化指标"],
+        verdict: "mixed",
+      });
+      expect(report).toEqual({
+        strengths: ["案例背景交代清楚"],
+        gaps: ["量化结果表达偏弱"],
+        communicationNotes: ["建议先讲目标，再讲动作和结果"],
+        nextStudyPlan: ["补两段可量化的项目案例"],
+      });
+      expect(fetch).toHaveBeenCalledTimes(3);
+    } finally {
+      process.env = originalEnv;
+    }
+  });
 });

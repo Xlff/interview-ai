@@ -2,15 +2,17 @@ import type { InterviewSessionSnapshot } from "@/features/interview/models/inter
 import type { SavedInterviewTurn } from "@/features/interview/models/interview-turn";
 import { db } from "@/lib/db";
 import { getOrCreatePrepPack } from "@/server/repositories/prep-pack-repository";
+import { createLLMProvider, type LLMRequestOptions } from "@/server/services/llm-provider";
 import {
   buildInterviewSessionDraft,
-  planNextInterviewTurn,
+  planNextInterviewTurnWithLLM,
 } from "@/server/services/interview-orchestrator-service";
 
 export async function createInterviewSession(
   jobTargetId: string,
+  llmOptions?: LLMRequestOptions,
 ): Promise<InterviewSessionSnapshot | null> {
-  const prepPack = await getOrCreatePrepPack(jobTargetId);
+  const prepPack = await getOrCreatePrepPack(jobTargetId, llmOptions);
 
   if (!prepPack) {
     return null;
@@ -68,6 +70,7 @@ export async function getInterviewSessionById(
 export async function answerCurrentInterviewTurn(
   sessionId: string,
   userAnswer: string,
+  llmOptions?: LLMRequestOptions,
 ): Promise<InterviewSessionSnapshot | null> {
   const existing = await db.interviewSession.findUnique({
     where: { id: sessionId },
@@ -90,13 +93,14 @@ export async function answerCurrentInterviewTurn(
     return getInterviewSessionById(sessionId);
   }
 
-  const prepPack = await getOrCreatePrepPack(existing.jobTargetId);
+  const prepPack = await getOrCreatePrepPack(existing.jobTargetId, llmOptions);
 
   if (!prepPack) {
     return null;
   }
 
-  const outcome = planNextInterviewTurn({
+  const llmProvider = createLLMProvider(llmOptions);
+  const outcome = await planNextInterviewTurnWithLLM({
     prepPack,
     session: {
       id: existing.id,
@@ -109,6 +113,7 @@ export async function answerCurrentInterviewTurn(
     turns: existing.turns.map(mapTurnRecord),
     currentTurn: mapTurnRecord(currentTurn),
     userAnswer,
+    llmProvider,
   });
 
   await db.$transaction(async function runTransaction(transaction) {

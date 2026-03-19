@@ -6,15 +6,23 @@ type ReviewRouteProps = {
   params: Promise<{
     sessionId: string;
   }>;
+  searchParams: Promise<{
+    provider?: string;
+    model?: string;
+  }>;
 };
 
-export default async function ReviewRoute({ params }: ReviewRouteProps) {
+export default async function ReviewRoute({ params, searchParams }: ReviewRouteProps) {
   const { sessionId } = await params;
-  const report = await getOrCreateReviewReport(sessionId);
+  const { provider, model } = await searchParams;
+  const report = await getOrCreateReviewReport(sessionId, {
+    providerId: provider,
+    model,
+  });
 
   if (!report) {
     notFound();
   }
 
-  return <ReviewPage report={report} />;
+  return <ReviewPage report={report} providerId={provider} model={model} />;
 }

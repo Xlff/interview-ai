@@ -246,13 +246,130 @@ function createOpenAICompatibleProvider(
       return enhanced.highFreqQuestions;
     },
     async generateFollowUpQuestion(input) {
-      return noopLLMProvider.generateFollowUpQuestion(input);
+      try {
+        const selection = resolveLLMSelection(registry, options);
+        const payload = await runChatCompletion(selection.config, selection.model, [
+          {
+            role: "system",
+            content:
+              "You generate concise Chinese interview follow-up questions. Return plain text only.",
+          },
+          {
+            role: "user",
+            content: [
+              "请根据当前题目、候选人回答和考察维度，生成一句中文追问。",
+              "要求：",
+              "1. 只返回一句追问，不要解释",
+              "2. 要具体，优先追问职责、动作、量化结果、关键决策",
+              "3. 不要使用 markdown",
+              "",
+              `当前题目:\n${input.currentQuestion}`,
+              "",
+              `候选人回答:\n${input.userAnswer}`,
+              "",
+              `考察维度:\n${input.dimension}`,
+              "",
+              `评分点:\n${input.evaluationPoints.join("\n")}`,
+            ].join("\n"),
+          },
+        ]);
+
+        const fallback = await noopLLMProvider.generateFollowUpQuestion(input);
+        return normalizeString(payload, fallback);
+      } catch {
+        return noopLLMProvider.generateFollowUpQuestion(input);
+      }
     },
     async evaluateInterviewAnswer(input) {
-      return noopLLMProvider.evaluateInterviewAnswer(input);
+      try {
+        const selection = resolveLLMSelection(registry, options);
+        const payload = await runChatCompletion(selection.config, selection.model, [
+          {
+            role: "system",
+            content:
+              "You evaluate interview answers in Chinese. Return valid JSON only with keys summary, coveredPoints, missingPoints, verdict.",
+          },
+          {
+            role: "user",
+            content: [
+              "请根据题目、回答和评分点，评估这轮面试回答。",
+              "要求：",
+              "1. 只返回 JSON",
+              "2. verdict 只能是 strong、mixed、weak",
+              "3. summary 用中文，1 到 2 句",
+              "4. coveredPoints 和 missingPoints 都返回字符串数组",
+              "",
+              `题目:\n${input.question}`,
+              "",
+              `回答:\n${input.userAnswer}`,
+              "",
+              `评分点:\n${input.evaluationPoints.join("\n")}`,
+            ].join("\n"),
+          },
+        ]);
+
+        const parsed = parseJSONObject(payload);
+        const fallback = await noopLLMProvider.evaluateInterviewAnswer(input);
+
+        return {
+          summary: normalizeString(parsed.summary, fallback.summary),
+          coveredPoints: normalizeStringArray(parsed.coveredPoints, fallback.coveredPoints),
+          missingPoints: normalizeStringArray(parsed.missingPoints, fallback.missingPoints),
+          verdict: normalizeVerdict(parsed.verdict, fallback.verdict),
+        };
+      } catch {
+        return noopLLMProvider.evaluateInterviewAnswer(input);
+      }
     },
     async generateReviewReport(input) {
-      return noopLLMProvider.generateReviewReport(input);
+      try {
+        const selection = resolveLLMSelection(registry, options);
+        const payload = await runChatCompletion(selection.config, selection.model, [
+          {
+            role: "system",
+            content:
+              "You summarize interview reviews in Chinese. Return valid JSON only with keys strengths, gaps, communicationNotes, nextStudyPlan.",
+          },
+          {
+            role: "user",
+            content: [
+              "请根据岗位名称和多轮面试记录，生成中文复盘。",
+              "要求：",
+              "1. 只返回 JSON",
+              "2. strengths、gaps、communicationNotes、nextStudyPlan 都返回字符串数组",
+              "3. 每个数组返回 1 到 3 条，简洁直接",
+              "",
+              `岗位:\n${input.normalizedTitle}`,
+              "",
+              `面试记录:\n${input.turns
+                .map(function formatTurn(turn, index) {
+                  return [
+                    `第 ${index + 1} 轮`,
+                    `问题: ${turn.question}`,
+                    `回答: ${turn.answer}`,
+                    `维度: ${turn.dimension}`,
+                  ].join("\n");
+                })
+                .join("\n\n")}`,
+            ].join("\n"),
+          },
+        ]);
+
+        const parsed = parseJSONObject(payload);
+        const fallback = await noopLLMProvider.generateReviewReport(input);
+
+        return {
+          strengths: normalizeStringArray(parsed.strengths, fallback.strengths),
+          gaps: normalizeStringArray(parsed.gaps, fallback.gaps),
+          communicationNotes: normalizeStringArray(
+            parsed.communicationNotes,
+            fallback.communicationNotes,
+          ),
+          nextStudyPlan: normalizeStringArray(parsed.nextStudyPlan, fallback.nextStudyPlan),
+        };
+      } catch {
+        return noopLLMProvider.generateReviewReport(input);
+      }
     },
   };
 }
@@ -331,6 +448,21 @@ function normalizeStringArray(value: unknown, fallback: string[]) {
     });
 
   return normalized.length > 0 ? normalized : fallback;
+}
+
+function normalizeString(value: unknown, fallback: string) {
+  return typeof value === "string" && value.trim().length > 0 ? value.trim() : fallback;
+}
+
+function normalizeVerdict(
+  value: unknown,
+  fallback: "strong" | "mixed" | "weak",
+): "strong" | "mixed" | "weak" {
+  if (value === "strong" || value === "mixed" || value === "weak") {
+    return value;
+  }
+
+  return fallback;
 }
 
 function splitList(value: string | undefined) {

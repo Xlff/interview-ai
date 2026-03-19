@@ -4,7 +4,8 @@ import type {
 } from "@/features/interview/models/interview-session";
 import type { InterviewTurnDraft, SavedInterviewTurn } from "@/features/interview/models/interview-turn";
 import type { SavedPrepPack } from "@/features/prep-pack/models/prep-pack";
-import { evaluateInterviewAnswer } from "./answer-evaluator-service";
+import type { LLMProvider } from "./llm-provider";
+import { enhanceInterviewEvaluation, evaluateInterviewAnswer } from "./answer-evaluator-service";
 
 const defaultTotalRounds = 6;
 
@@ -35,6 +36,35 @@ export function planNextInterviewTurn(input: PlanNextInterviewTurnInput) {
     currentTurn: input.currentTurn,
     userAnswer: input.userAnswer,
   });
+
+  return buildPlannedInterviewOutcome(input, evaluation);
+}
+
+type PlanNextInterviewTurnWithLLMInput = PlanNextInterviewTurnInput & {
+  llmProvider: LLMProvider;
+};
+
+export async function planNextInterviewTurnWithLLM(input: PlanNextInterviewTurnWithLLMInput) {
+  const baseEvaluation = evaluateInterviewAnswer({
+    prepPack: input.prepPack,
+    currentTurn: input.currentTurn,
+    userAnswer: input.userAnswer,
+  });
+  const evaluation = await enhanceInterviewEvaluation({
+    prepPack: input.prepPack,
+    currentTurn: input.currentTurn,
+    userAnswer: input.userAnswer,
+    evaluation: baseEvaluation,
+    llmProvider: input.llmProvider,
+  });
+
+  return buildPlannedInterviewOutcome(input, evaluation);
+}
+
+function buildPlannedInterviewOutcome(
+  input: PlanNextInterviewTurnInput,
+  evaluation: ReturnType<typeof evaluateInterviewAnswer>,
+) {
   const nextTurnIndex = input.currentTurn.turnIndex + 1;
 
   if (nextTurnIndex > input.session.totalRounds) {

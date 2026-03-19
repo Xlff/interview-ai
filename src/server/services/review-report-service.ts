@@ -1,5 +1,6 @@
 import type { SavedInterviewTurn } from "@/features/interview/models/interview-turn";
 import type { ReviewReportDraft } from "@/features/review/models/review-report";
+import type { LLMProvider } from "./llm-provider";
 
 type BuildReviewReportInput = {
   normalizedTitle: string;
@@ -44,6 +45,40 @@ export function buildReviewReport(input: BuildReviewReportInput): ReviewReportDr
   };
 }
 
+type EnhanceReviewReportDraftInput = {
+  normalizedTitle: string;
+  turns: SavedInterviewTurn[];
+  report: ReviewReportDraft;
+  llmProvider: LLMProvider;
+};
+
+export async function enhanceReviewReportDraft(
+  input: EnhanceReviewReportDraftInput,
+): Promise<ReviewReportDraft> {
+  const llmReport = await input.llmProvider.generateReviewReport({
+    normalizedTitle: input.normalizedTitle,
+    turns: input.turns
+      .filter(function includeAnsweredTurn(turn) {
+        return Boolean(turn.userAnswer);
+      })
+      .map(function mapTurn(turn) {
+        return {
+          question: turn.question,
+          answer: turn.userAnswer ?? "",
+          dimension: turn.dimension,
+        };
+      }),
+  });
+
+  return {
+    strengths: normalizeArray(llmReport.strengths, input.report.strengths),
+    gaps: normalizeArray(llmReport.gaps, input.report.gaps),
+    missedPoints: input.report.missedPoints,
+    communicationNotes: normalizeArray(llmReport.communicationNotes, input.report.communicationNotes),
+    nextStudyPlan: normalizeArray(llmReport.nextStudyPlan, input.report.nextStudyPlan),
+  };
+}
+
 function buildCommunicationNotes(turns: SavedInterviewTurn[]) {
   const averageLength =
     turns.reduce(function sumLength(total, turn) {
@@ -75,4 +110,8 @@ function buildNextStudyPlan(studyOutline: string[], gaps: string[], missedPoints
   }
 
   return Array.from(new Set(plan));
+}
+
+function normalizeArray(value: string[], fallback: string[]) {
+  return Array.isArray(value) && value.length > 0 ? value : fallback;
 }

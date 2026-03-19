@@ -1,10 +1,12 @@
 import type { SavedReviewReport } from "@/features/review/models/review-report";
 import { db } from "@/lib/db";
 import { getOrCreatePrepPack } from "@/server/repositories/prep-pack-repository";
-import { buildReviewReport } from "@/server/services/review-report-service";
+import { createLLMProvider, type LLMRequestOptions } from "@/server/services/llm-provider";
+import { buildReviewReport, enhanceReviewReportDraft } from "@/server/services/review-report-service";
 
 export async function getOrCreateReviewReport(
   sessionId: string,
+  llmOptions?: LLMRequestOptions,
 ): Promise<SavedReviewReport | null> {
   const existing = await db.reviewReport.findUnique({
     where: { sessionId },
@@ -45,13 +47,13 @@ export async function getOrCreateReviewReport(
     return null;
   }
 
-  const prepPack = await getOrCreatePrepPack(session.jobTargetId);
+  const prepPack = await getOrCreatePrepPack(session.jobTargetId, llmOptions);
 
   if (!prepPack) {
     return null;
   }
 
-  const draft = buildReviewReport({
+  const baseDraft = buildReviewReport({
     normalizedTitle: session.jobTarget.normalizedTitle,
     turns: session.turns.map(function mapTurn(turn) {
       return {
@@ -72,6 +74,30 @@ export async function getOrCreateReviewReport(
       };
     }),
     studyOutline: prepPack.studyOutline,
+  });
+  const llmProvider = createLLMProvider(llmOptions);
+  const draft = await enhanceReviewReportDraft({
+    normalizedTitle: session.jobTarget.normalizedTitle,
+    turns: session.turns.map(function mapTurn(turn) {
+      return {
+        id: turn.id,
+        sessionId: turn.sessionId,
+        question: turn.question,
+        questionType: turn.questionType as "primary" | "follow_up",
+        dimension: turn.dimension,
+        turnIndex: turn.turnIndex,
+        userAnswer: turn.userAnswer ?? undefined,
+        evaluation: turn.evaluation as {
+          verdict: "strong" | "mixed" | "weak";
+          summary: string;
+          coveredPoints: string[];
+          missingPoints: string[];
+        } | undefined,
+        followUpHint: turn.followUpHint,
+      };
+    }),
+    report: baseDraft,
+    llmProvider,
   });
 
   const record = await db.reviewReport.create({

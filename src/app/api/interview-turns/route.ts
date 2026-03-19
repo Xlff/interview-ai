@@ -4,6 +4,8 @@ import { answerCurrentInterviewTurn } from "@/server/repositories/interview-sess
 type InterviewTurnRequest = {
   sessionId?: string;
   userAnswer?: string;
+  providerId?: string;
+  model?: string;
 };
 
 export async function POST(request: Request) {
@@ -16,7 +18,10 @@ export async function POST(request: Request) {
     );
   }
 
-  const session = await answerCurrentInterviewTurn(payload.sessionId, payload.userAnswer);
+  const session = await answerCurrentInterviewTurn(payload.sessionId, payload.userAnswer, {
+    providerId: payload.providerId,
+    model: payload.model,
+  });
 
   if (!session) {
     return NextResponse.json(

@@ -4,9 +4,23 @@ import type { SavedReviewReport } from "../models/review-report";
 
 type ReviewReportViewProps = {
   report: SavedReviewReport;
+  providerId?: string;
+  model?: string;
 };
 
-export default function ReviewReportView({ report }: ReviewReportViewProps) {
+export default function ReviewReportView({ report, providerId, model }: ReviewReportViewProps) {
+  const search = new URLSearchParams();
+
+  if (providerId) {
+    search.set("provider", providerId);
+  }
+
+  if (model) {
+    search.set("model", model);
+  }
+
+  const searchSuffix = search.size > 0 ? `?${search.toString()}` : "";
+
   return (
     <main className="grid min-h-screen px-6 py-12">
       <section className="mx-auto grid w-full max-w-[1040px] gap-5">
@@ -71,7 +85,7 @@ export default function ReviewReportView({ report }: ReviewReportViewProps) {
 
         <div className="flex flex-wrap gap-3">
           <Link
-            href={`/prep/${report.jobTargetId}`}
+            href={`/prep/${report.jobTargetId}${searchSuffix}`}
             className="inline-flex h-12 items-center justify-center whitespace-nowrap rounded-full bg-[var(--accent)] px-5 leading-none font-bold text-[var(--accent-foreground)]"
           >
             回到准备包，开始下一轮

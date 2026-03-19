@@ -1,5 +1,6 @@
 import type { SavedPrepPack } from "@/features/prep-pack/models/prep-pack";
 import type { SavedInterviewTurn, InterviewTurnEvaluation } from "@/features/interview/models/interview-turn";
+import type { LLMProvider } from "./llm-provider";
 
 type EvaluateInterviewAnswerInput = {
   prepPack: SavedPrepPack;
@@ -47,6 +48,55 @@ export function evaluateInterviewAnswer(
   };
 }
 
+type EnhanceInterviewEvaluationInput = EvaluateInterviewAnswerInput & {
+  evaluation: InterviewTurnEvaluation & { followUpHint?: string };
+  llmProvider: LLMProvider;
+};
+
+export async function enhanceInterviewEvaluation(
+  input: EnhanceInterviewEvaluationInput,
+): Promise<InterviewTurnEvaluation & { followUpHint?: string }> {
+  const expectedKeywords = collectExpectedKeywords(input.prepPack, input.currentTurn.dimension);
+  const llmEvaluation = await input.llmProvider.evaluateInterviewAnswer({
+    question: input.currentTurn.question,
+    userAnswer: input.userAnswer,
+    evaluationPoints: expectedKeywords,
+  });
+
+  const verdict = llmEvaluation.verdict ?? input.evaluation.verdict;
+  const summary = normalizeString(llmEvaluation.summary, input.evaluation.summary);
+  const coveredPoints = normalizeArray(llmEvaluation.coveredPoints, input.evaluation.coveredPoints);
+  const missingPoints = normalizeArray(llmEvaluation.missingPoints, input.evaluation.missingPoints);
+
+  if (verdict === "weak" && input.currentTurn.questionType === "primary") {
+    const llmFollowUp = await input.llmProvider.generateFollowUpQuestion({
+      currentQuestion: input.currentTurn.question,
+      userAnswer: input.userAnswer,
+      dimension: input.currentTurn.dimension,
+      evaluationPoints: expectedKeywords,
+    });
+
+    return {
+      verdict,
+      summary,
+      coveredPoints,
+      missingPoints,
+      followUpHint: normalizeString(
+        llmFollowUp,
+        input.evaluation.followUpHint ?? buildFollowUpHint(input.currentTurn.dimension),
+      ),
+    };
+  }
+
+  return {
+    verdict,
+    summary,
+    coveredPoints,
+    missingPoints,
+    followUpHint: input.evaluation.followUpHint,
+  };
+}
+
 function collectExpectedKeywords(prepPack: SavedPrepPack, dimension: string) {
   const domainKeywords = prepPack.keySkills.slice(0, 3);
   const themeKeywords = prepPack.roleProfile.questionThemes.slice(0, 2);
@@ -80,4 +130,12 @@ function buildFollowUpHint(dimension: string) {
   }
 
   return "请补充你如何和其他角色协作推进，以及遇到的阻力。";
+}
+
+function normalizeString(value: string | undefined, fallback: string) {
+  return value && value.trim().length > 0 ? value.trim() : fallback;
+}
+
+function normalizeArray(value: string[] | undefined, fallback: string[]) {
+  return Array.isArray(value) && value.length > 0 ? value : fallback;
 }

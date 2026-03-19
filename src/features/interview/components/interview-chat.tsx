@@ -6,11 +6,24 @@ import { useInterviewSession } from "../view-models/use-interview-session";
 
 type InterviewChatProps = {
   initialSession: InterviewSessionSnapshot;
+  providerId?: string;
+  model?: string;
 };
 
-export default function InterviewChat({ initialSession }: InterviewChatProps) {
+export default function InterviewChat({ initialSession, providerId, model }: InterviewChatProps) {
   const { session, answer, isSubmitting, submitError, setAnswer, submitAnswer } =
-    useInterviewSession(initialSession);
+    useInterviewSession(initialSession, { providerId, model });
+  const search = new URLSearchParams();
+
+  if (providerId) {
+    search.set("provider", providerId);
+  }
+
+  if (model) {
+    search.set("model", model);
+  }
+
+  const searchSuffix = search.size > 0 ? `?${search.toString()}` : "";
 
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -106,13 +119,13 @@ export default function InterviewChat({ initialSession }: InterviewChatProps) {
             </p>
             <div className="flex flex-wrap gap-3">
               <Link
-                href={`/review/${session.id}`}
+                href={`/review/${session.id}${searchSuffix}`}
                 className="inline-flex h-12 w-fit items-center justify-center whitespace-nowrap rounded-full bg-[var(--accent)] px-5 leading-none font-bold text-[var(--accent-foreground)]"
               >
                 查看复盘报告
               </Link>
               <Link
-                href={`/prep/${session.jobTargetId}`}
+                href={`/prep/${session.jobTargetId}${searchSuffix}`}
                 className="inline-flex h-12 w-fit items-center justify-center whitespace-nowrap rounded-full border border-[var(--border)] px-5 leading-none font-bold"
               >
                 返回岗位准备包

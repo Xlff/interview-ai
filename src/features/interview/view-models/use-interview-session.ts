@@ -12,7 +12,15 @@ type UseInterviewSessionResult = {
   submitAnswer(): Promise<void>;
 };
 
-export function useInterviewSession(initialSession: InterviewSessionSnapshot): UseInterviewSessionResult {
+type LLMSelection = {
+  providerId?: string;
+  model?: string;
+};
+
+export function useInterviewSession(
+  initialSession: InterviewSessionSnapshot,
+  llmSelection?: LLMSelection,
+): UseInterviewSessionResult {
   const [session, setSession] = useState(initialSession);
   const [answer, setAnswer] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -36,6 +44,8 @@ export function useInterviewSession(initialSession: InterviewSessionSnapshot): U
         body: JSON.stringify({
           sessionId: session.id,
           userAnswer: answer,
+          providerId: llmSelection?.providerId,
+          model: llmSelection?.model,
         }),
       });
 

@@ -6,15 +6,20 @@ type InterviewRouteProps = {
   params: Promise<{
     sessionId: string;
   }>;
+  searchParams: Promise<{
+    provider?: string;
+    model?: string;
+  }>;
 };
 
-export default async function InterviewRoute({ params }: InterviewRouteProps) {
+export default async function InterviewRoute({ params, searchParams }: InterviewRouteProps) {
   const { sessionId } = await params;
+  const { provider, model } = await searchParams;
   const session = await getInterviewSessionById(sessionId);
 
   if (!session) {
     notFound();
   }
 
-  return <InterviewPage initialSession={session} />;
+  return <InterviewPage initialSession={session} providerId={provider} model={model} />;
 }

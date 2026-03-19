@@ -5,9 +5,15 @@ import { useState } from "react";
 
 type StartInterviewButtonProps = {
   jobTargetId: string;
+  providerId?: string;
+  model?: string;
 };
 
-export default function StartInterviewButton({ jobTargetId }: StartInterviewButtonProps) {
+export default function StartInterviewButton({
+  jobTargetId,
+  providerId,
+  model,
+}: StartInterviewButtonProps) {
   const router = useRouter();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
@@ -22,7 +28,7 @@ export default function StartInterviewButton({ jobTargetId }: StartInterviewButt
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ jobTargetId }),
+        body: JSON.stringify({ jobTargetId, providerId, model }),
       });
 
       if (!response.ok) {
@@ -30,7 +36,18 @@ export default function StartInterviewButton({ jobTargetId }: StartInterviewButt
       }
 
       const payload = (await response.json()) as { id: string };
-      router.push(`/interview/${payload.id}`);
+      const search = new URLSearchParams();
+
+      if (providerId) {
+        search.set("provider", providerId);
+      }
+
+      if (model) {
+        search.set("model", model);
+      }
+
+      const searchSuffix = search.size > 0 ? `?${search.toString()}` : "";
+      router.push(`/interview/${payload.id}${searchSuffix}`);
     } catch (error) {
       setSubmitError(error instanceof Error ? error.message : "文字面试暂时不可用，请稍后重试");
     } finally {
