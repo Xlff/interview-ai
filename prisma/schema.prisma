@@ -1,0 +1,179 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model User {
+  id         String      @id @default(uuid()) @db.Uuid
+  email      String      @unique
+  createdAt  DateTime    @default(now())
+  updatedAt  DateTime    @updatedAt
+  jobTargets JobTarget[]
+  sessions   InterviewSession[]
+}
+
+model JobTarget {
+  id              String             @id @default(uuid()) @db.Uuid
+  userId          String?            @db.Uuid
+  rawJD           String
+  normalizedJD    String?
+  jdHash          String?            @unique
+  normalizedTitle String
+  domain          String
+  level           String
+  keySkills       Json
+  responsibilities Json
+  createdAt       DateTime           @default(now())
+  updatedAt       DateTime           @updatedAt
+  user            User?              @relation(fields: [userId], references: [id], onDelete: SetNull)
+  roleProfile     RoleProfile?
+  prepPack        PrepPack?
+  sessions        InterviewSession[]
+}
+
+model RoleProfile {
+  id             String    @id @default(uuid()) @db.Uuid
+  jobTargetId    String    @unique @db.Uuid
+  dimensions     Json
+  mustHaveSkills Json
+  niceToHaveSkills Json
+  questionThemes Json
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+  jobTarget      JobTarget @relation(fields: [jobTargetId], references: [id], onDelete: Cascade)
+}
+
+model PrepPack {
+  id               String    @id @default(uuid()) @db.Uuid
+  jobTargetId      String    @unique @db.Uuid
+  roleSummary      String
+  highFreqQuestions Json
+  evaluationPoints Json
+  studyOutline     Json
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
+  jobTarget        JobTarget @relation(fields: [jobTargetId], references: [id], onDelete: Cascade)
+}
+
+model InterviewSession {
+  id              String          @id @default(uuid()) @db.Uuid
+  jobTargetId     String          @db.Uuid
+  userId          String?         @db.Uuid
+  status          String
+  mode            String
+  totalRounds     Int
+  currentRound    Int
+  focusDimensions Json?
+  createdAt       DateTime        @default(now())
+  completedAt     DateTime?
+  updatedAt       DateTime        @updatedAt
+  jobTarget       JobTarget       @relation(fields: [jobTargetId], references: [id], onDelete: Cascade)
+  user            User?           @relation(fields: [userId], references: [id], onDelete: SetNull)
+  turns           InterviewTurn[]
+  reviewReport    ReviewReport?
+}
+
+model InterviewTurn {
+  id           String           @id @default(uuid()) @db.Uuid
+  sessionId    String           @db.Uuid
+  question     String
+  questionType String
+  dimension    String
+  userAnswer   String?
+  evaluation   Json?
+  followUpHint String?
+  turnIndex    Int
+  createdAt    DateTime         @default(now())
+  updatedAt    DateTime         @updatedAt
+  session      InterviewSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+}
+
+model ReviewReport {
+  id                 String           @id @default(uuid()) @db.Uuid
+  sessionId          String           @unique @db.Uuid
+  strengths          Json
+  gaps               Json
+  missedPoints       Json
+  communicationNotes Json
+  nextStudyPlan      Json
+  createdAt          DateTime         @default(now())
+  updatedAt          DateTime         @updatedAt
+  session            InterviewSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+}
+
+model SkillDictionary {
+  id        String   @id @default(uuid()) @db.Uuid
+  name      String
+  aliases   Json
+  domain    String
+  category  String
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([domain, name])
+}
+
+model RoleTemplate {
+  id                      String      @id @default(uuid()) @db.Uuid
+  domain                  String
+  normalizedTitle         String
+  level                   String
+  dimensions              Json
+  defaultQuestionThemes   Json
+  defaultEvaluationPoints Json
+  isActive                Boolean     @default(true)
+  createdAt               DateTime    @default(now())
+  updatedAt               DateTime    @updatedAt
+  roleConfig              RoleConfig?
+
+  @@unique([domain, normalizedTitle, level])
+}
+
+model RoleConfig {
+  id                     String       @id @default(uuid()) @db.Uuid
+  roleTemplateId         String       @unique @db.Uuid
+  mustHaveSkillIds       Json
+  niceToHaveSkillIds     Json
+  questionSelectionRules Json
+  prepPackRules          Json
+  isActive               Boolean      @default(true)
+  createdAt              DateTime     @default(now())
+  updatedAt              DateTime     @updatedAt
+  roleTemplate           RoleTemplate @relation(fields: [roleTemplateId], references: [id], onDelete: Cascade)
+}
+
+model QuestionBankItem {
+  id               String   @id @default(uuid()) @db.Uuid
+  domain           String
+  normalizedTitle  String
+  level            String
+  dimension        String
+  question         String
+  questionType     String
+  skillTags        Json
+  evaluationPoints Json
+  followUpHints    Json
+  isActive         Boolean  @default(true)
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  @@index([domain, normalizedTitle, level])
+}
+
+model MockJobDescription {
+  id              String   @id @default(uuid()) @db.Uuid
+  domain          String
+  normalizedTitle String
+  level           String
+  label           String
+  rawJD           String
+  isSeed          Boolean  @default(true)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@index([domain, normalizedTitle, level])
+}

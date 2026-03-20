@@ -6,7 +6,7 @@
 
 **Architecture:** Build a modular monolith in Next.js App Router. Keep UI, service orchestration, data access, and external integrations separated so the product can launch quickly now and split services later if needed.
 
-**Tech Stack:** Next.js 15, React 19, TypeScript, Tailwind CSS v4, shadcn/ui, Supabase Auth/Postgres/Storage, Prisma, Vitest, Testing Library, Playwright
+**Tech Stack:** Next.js 16.1, React 19.2, TypeScript, Tailwind CSS v4, shadcn/ui, Supabase Auth/Postgres/Storage, Prisma 7, Vitest 4, Testing Library, Playwright
 
 ---
 

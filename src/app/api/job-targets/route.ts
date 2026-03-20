@@ -1,0 +1,27 @@
+import { NextResponse } from "next/server";
+import { validateJobTargetInput, type JobTargetInput } from "@/features/job-target/models/job-target";
+import { createJobTarget } from "@/server/repositories/job-target-repository";
+import { analyzeJobDescription } from "@/server/services/jd-analysis-service";
+
+export async function POST(request: Request) {
+  const payload = (await request.json()) as JobTargetInput;
+  const validation = validateJobTargetInput(payload);
+
+  if (!validation.success) {
+    return NextResponse.json(
+      {
+        errors: validation.errors,
+      },
+      { status: 400 },
+    );
+  }
+
+  const draft = analyzeJobDescription(payload);
+  const savedJobTarget = await createJobTarget(
+    payload.rawJD.trim(),
+    draft,
+    payload.preferredDomain,
+  );
+
+  return NextResponse.json(savedJobTarget, { status: 201 });
+}
