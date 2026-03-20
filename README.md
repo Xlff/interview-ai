@@ -71,6 +71,11 @@ SUPABASE_SERVICE_ROLE_KEY="your-local-service-role-key"
 - `NEXT_PUBLIC_SUPABASE_ANON_KEY`
 - `SUPABASE_SERVICE_ROLE_KEY`
 
+注意：
+- `.env` 文件里保留引号没有问题
+- 但在 `Vercel` 环境变量面板里粘贴值时，不要把外层引号一起贴进去
+- 例如应填 `postgresql://...`，不要填 `"postgresql://..."`
+
 如果你启用了多模型切换，还需要补充：
 - `LLM_PROVIDER_IDS`
 - `LLM_DEFAULT_PROVIDER`

@@ -5,7 +5,20 @@ function requireEnv(name: string) {
     throw new Error(`Missing required environment variable: ${name}`);
   }
 
-  return value;
+  return normalizeEnvValue(value);
+}
+
+function normalizeEnvValue(value: string) {
+  const trimmed = value.trim();
+
+  if (
+    (trimmed.startsWith('"') && trimmed.endsWith('"')) ||
+    (trimmed.startsWith("'") && trimmed.endsWith("'"))
+  ) {
+    return trimmed.slice(1, -1);
+  }
+
+  return trimmed;
 }
 
 export const env = {

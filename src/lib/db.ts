@@ -1,17 +1,14 @@
 import { PrismaPg } from "@prisma/adapter-pg";
 import { PrismaClient } from "@prisma/client";
 import { Pool } from "pg";
+import { env } from "@/lib/env";
 
 declare global {
   var __db: PrismaClient | undefined;
   var __dbPool: Pool | undefined;
 }
 
-const connectionString = process.env.DATABASE_URL;
-
-if (!connectionString) {
-  throw new Error("DATABASE_URL is required");
-}
+const connectionString = env.databaseUrl();
 
 const pool =
   globalThis.__dbPool ??
