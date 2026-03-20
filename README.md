@@ -75,6 +75,8 @@ SUPABASE_SERVICE_ROLE_KEY="your-local-service-role-key"
 - `.env` 文件里保留引号没有问题
 - 但在 `Vercel` 环境变量面板里粘贴值时，不要把外层引号一起贴进去
 - 例如应填 `postgresql://...`，不要填 `"postgresql://..."`
+- 如果数据库密码里包含 `#`、空格、引号等保留字符，连接串里必须做 URL 编码
+- 例如密码 `pa#ss word` 应写成 `pa%23ss%20word`
 
 如果你启用了多模型切换，还需要补充：
 - `LLM_PROVIDER_IDS`
